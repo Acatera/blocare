@@ -1,0 +1,24 @@
+unit Update;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs;
+
+type
+  TFUpdate = class(TForm)
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FUpdate: TFUpdate;
+
+implementation
+
+{$R *.dfm}
+
+end.

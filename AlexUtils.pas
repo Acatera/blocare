@@ -1,0 +1,1215 @@
+unit AlexUtils;
+
+interface
+
+uses
+  Registry, Classes, Windows, Dialogs, SysUtils, ShellAPI, Controls, Forms,
+  {Constants, }DBTables, IniFiles, dbiProcs, {RbDrawCore, RbButton, }Graphics, DB,
+  DBGrids, Math, ExtCtrls, StdCtrls;
+
+type
+  TAliasParams = array[1..12] of string;
+  THSLValue = record
+    H: extended;
+    S: extended;
+    L: extended;
+  end;
+  TVerifyAction = (acInstall, acAskInstall, acDoNothing);
+  TMyRbColors = record
+    BorderColor: integer;
+    ClickedFrom: integer;
+    ClickedTo: integer;
+    DefaultFrom: integer;
+    DefaultTo: integer;
+    HotTrack: integer;
+    OverFrom: integer;
+    OverTo: integer;
+    TextShadow: integer;
+  end;
+  TMyFont = record
+    Name: string;
+    Size: integer;
+    Style: TFontStyles;
+    Color: integer;
+  end;
+  TMyTheme = record
+    Colors: TMyRbColors;
+    FormColor: integer;
+    Font: TMyFont;
+    GridFont: TMyFont;
+  end;
+  TVersion = record
+    Major: integer;
+    Minor: integer;
+    Release: integer;
+    Build: integer;
+  end;
+  TFirma = record
+    Serie: string;
+    Denfur: string;
+    CUI: string;
+    NrOrdReg: string;
+    Sediu: string;
+    Judet: string;
+    Cont: string;
+    Banca: string;
+    Trezo:string;
+    BancaTR:string;
+    CapSocial: string;
+    Intocmit: string;
+  end;
+
+const
+  LuniScurte: array[1..12] of string[3] = (
+    'Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun',
+    'Iul', 'Aug', 'Sept', 'Oct', 'Noi', 'Dec');
+  Luni: array[1..12] of string = (
+    'Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie',
+    'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie');
+  LOGGING: boolean = True;
+  LOG_FILE: string = '\err.log';
+  FORM_COLOR: integer = $00F4D3B9;
+  FirmaDSOFT: TFirma = 
+    (
+      Serie :     'TM DST';
+      Denfur :    'S.C. D-SOFT SRL';
+      CUI :       'RO1819101';
+      NrOrdReg :  'J35/2230/1992';
+      Sediu :     'B-DUL L. REBREANU, NR 53';
+      Judet :     'TIMIS';
+      Cont :      'RO78BACX0000000186498000';
+      Banca :     'UNICREDIT TIRIAC BANK';
+      Trezo :     'RO92TREZ6215069XXX002049';
+      BancaTr :   'TREZORERIA TIMISOARA';
+      CapSocial : '16.720 RON';
+      Intocmit :  'Document intocmit de: Milovan Teodora CNP: 2730504354739 C.I.: TM 638621';
+    );
+  FirmaSOFTWARE: TFirma = 
+    (
+      Serie :     'TM DSW';
+      Denfur :    'S.C. DAVID SOFTWARE SRL';
+      CUI :       'RO14302491';
+      NrOrdReg :  'J35/1316/2001';
+      Sediu :     'B-DUL L. REBREANU, NR 53';
+      Judet :     'TIMIS';
+      Cont :      'RO74BACX0000000186481000';
+      Banca :     'UNICREDIT TIRIAC BANK';
+      Trezo :     'RO38TREZ6215069XXX006513';
+      BancaTr :   'TREZORERIA TIMISOARA';
+      CapSocial : '200 RON';
+      Intocmit :  'Document intocmit de: Rujan Monica CNP: 2710310352631 C.I.: TM 288392';  
+    );
+  FirmaSERVICES: TFirma = 
+    (
+      Serie : 'TM SRV';
+      Denfur : 'S.C. DAVID SOFT SERVICES SRL';
+      CUI : 'RO18025890';
+      NrOrdReg : 'J35/3222/2005';
+      Sediu : 'B-DUL L. REBREANU, NR 53';
+      Judet : 'TIMIS';
+      Cont : 'RO93BACX0000000234116000';
+      Banca : 'UNICREDIT TIRIAC BANK';
+      CapSocial : '200 RON';
+      Intocmit : 'Document intocmit de: David Anca Simona CNP: 2770429354783 C.I.: TM 522703';
+    );
+  FirmaQUALITY: TFirma = 
+    (
+      Serie : 'TM QUS';
+      Denfur : 'S.C. QUALITY SOFT SRL';
+      CUI : 'RO24192396';
+      NrOrdReg : 'J35/2602/2008';
+      Sediu : 'B-DUL L. REBREANU, NR 53';
+      Judet : 'TIMIS';
+      Cont : 'RO02BACX0000000244708001';
+      Banca : 'UNICREDIT TIRIAC BANK';
+      CapSocial : '200 RON';
+      Intocmit : 'Document intocmit de: David Anca Simona CNP: 2770429354783 C.I.: TM 522703';
+    );  
+
+//functions
+function GetVersion(sFileName:string; const Separator: string = '.'): TVersion; 
+function GetVersionString(sFileName:string; const Separator: string = '.'): string; 
+function CompareVersions(NewVer, OldVer: TVersion): boolean;
+function VerifyDriver(Driver: string; Action: TVerifyAction): boolean;
+function InstallODBC(Silent: boolean): boolean;
+function InstallBDE(Silent: boolean): boolean;
+function StringToTStrings(Source: string; Separator: string): TStrings;
+function TStringsToString(Source: TStrings; Separator: string): String;
+function VerifyCUI(CUI: string): boolean;
+function VerifyCNP(CNP: string): boolean;
+function GetThemeData(Theme: string): TMyTheme;
+function GetFirmaFromDBName(DBName: string): TFirma;
+function MySQLDateToStr(Date: TDate; Format: string): string;
+function SQLString(Source: Widestring; Operation: string): Widestring;
+
+
+//misc
+function iif(Condition, Expr1, Expr2: variant): variant;
+function myInc(var AInteger: integer; const Step: integer = 1): integer;
+function PopMsg(Text: string): TForm;
+
+//Transformation
+function s2i(Source: string): integer; overload;
+function i2s(Source: variant): string;
+function s2f(Source: string): variant;
+function f2s(Source: variant): string;
+
+//Graphic
+function HSL2RGB(HSL: THSLValue): TColor;
+function RGB2HSL(AColor: TColor): THSLValue;
+function GetMedianColor(c1, c2: integer; p: word): TColor;
+
+//string
+function Cut(var AText: string; From, Distance: integer; const OffsetC: integer = 0; const OffsetD: integer = 0): string;
+function GetDigits(AValue: string): integer;
+//Supresses all the alphanumeric characters in the string except digits then returns that number
+function l(Value: string): integer;
+function StringReverse(S: string): string;
+function CountChr(const Chr: Char; S: string): Integer;
+function VerifyDate(Data: string): boolean;
+
+//procedures
+procedure VerifyAlias(Alias: string; Params: TAliasParams; Action: TVerifyAction);
+//procedure SQLOpen(Query: TQuery; SQL: String); overload;
+//procedure SQLExec(Query: TQuery; SQL: String);
+function GetLastSpace(Text: string; Pos: integer): integer;
+function SQLOpen(Query:TQuery; SQL: Widestring): Integer;  //Executes a SQL Open
+function SQLExec(Query:TQuery; SQL: Widestring): Integer;  //Executes a SQL Exec
+function DoSQL(Query: TQuery; SQL: Widestring): Integer;   //Executes a SQL Query
+procedure Log(Texts, Fisier:String; Log: Boolean);
+procedure LoadForm(FileName: String; Sender: TObject);
+procedure SaveForm(FileName: String; Sender: TObject);
+{procedure SetRbBtn(Sender: TRbButton; Theme: TMyTheme);}
+{procedure SetTheme(Sender: TObject; ThemeName: string);}
+
+//Graphic
+procedure GradientHorizontalMirror(ACanvas: TCanvas; ARect: TRect; AColor: TColor; const Delimiters: string = ''); overload;
+procedure GradientHorizontalMirror(APaintBox: TPaintBox; const Delimiters: string = ''); overload;
+procedure GradientHorizontalFooter(APaintBox: TPaintBox; const Delimiters: string = '');
+procedure GradientHorizontalMirrorExp(APaintBox: TPaintBox);
+
+implementation
+
+uses Dialog, FMain;
+  
+function GetVersion(sFileName:string; const Separator: string = '.'): TVersion;
+var
+  VerInfoSize: DWORD;
+  VerInfo: Pointer;
+  VerValueSize: DWORD;
+  VerValue: PVSFixedFileInfo;
+  Dummy: DWORD;
+begin
+  VerInfoSize := GetFileVersionInfoSize(PChar(sFileName), Dummy);
+  if VerInfoSize <= 0 then Exit;
+  GetMem(VerInfo, VerInfoSize);
+  GetFileVersionInfo(PChar(sFileName), 0, VerInfoSize, VerInfo);
+  VerQueryValue(VerInfo, '\', Pointer(VerValue), VerValueSize);
+  with VerValue^ do
+  begin
+    Result.Major := dwFileVersionMS shr 16;
+    Result.Minor := dwFileVersionMS and $FFFF;
+    Result.Release := dwFileVersionLS shr 16;
+    Result.Build := dwFileVersionLS and $FFFF;
+  end;
+  FreeMem(VerInfo, VerInfoSize);
+end;
+
+function GetVersionString(sFileName:string; const Separator: string = '.'): string;
+var
+  ver: TVersion;
+begin
+  ver := GetVersion(sFileName, Separator);
+  Result := i2s(ver.Major) + Separator + 
+            i2s(ver.Minor) + Separator + 
+            i2s(ver.Release) + Separator + 
+            i2s(ver.Build);
+end;
+
+function CompareVersions(NewVer, OldVer: TVersion): boolean;
+begin
+  if (NewVer.Major < OldVer.Major) then 
+    Result := True
+  else 
+    if (NewVer.Minor < OldVer.Minor) then 
+       Result := True
+    else   
+      if (NewVer.Release < OldVer.Release) then 
+        Result := True
+      else  
+        if (NewVer.Build >= OldVer.Build) then
+          Result := False
+        else    
+          Result := True;
+end;
+
+function VerifyDriver(Driver: String; Action: TVerifyAction): boolean;
+var
+  Keys : TStringList;
+  I : Integer;
+begin
+  Result := False;
+  if Driver = 'MySQL ODBC' then begin
+    with TRegistry.Create do
+      try
+        Keys := TStringList.Create;
+        RootKey := HKEY_LOCAL_MACHINE;
+        if not OpenKey('\SOFTWARE\ODBC\ODBCINST.INI', False) then Exit;
+        GetKeyNames(Keys);
+        for I := 0 to Keys.Count - 1 do
+          if Pos(Driver, Keys[I]) <> 0 then Result := True;
+        CloseKey;
+        if not Result then
+          case Action of
+              acInstall: begin //silent install of MyODBC
+                if not InstallODBC(True) then FDialog.Start('Atentie', 'Driverul MySQL ODBC nu s-a instalat cu success.', fdOk, 1)
+                else FDialog.Start('Atentie', 'Driverul MySQL ODBC s-a instalat cu success.', fdOk, 2);
+              end;
+              acAskInstall: begin
+                if FDialog.Start('Atentie', 'Driverul MySQL ODBC nu este instalat.' + #13 + 'Doriti sa-l instalati?', fdBtn_Yes or fdBtn_No, 3) = fdBtn_Yes then
+                  if not InstallODBC(True) then FDialog.Start('Atentie', 'Driverul MySQL ODBC nu s-a instalat cu success.', fdOk, 1)
+                  else begin
+                    FDialog.Start('Atentie', 'Driverul MySQL ODBC s-a instalat cu success.', fdOk, 2);
+                    Result := True;
+                  end;
+              end;
+              acDoNothing: begin
+                ShowMessage('Driverul MySQL ODBC nu este instalat.');
+                Exit;
+              end;
+            end;
+      finally
+        Free;
+        Keys.Free;
+      end;
+  end;
+  if UpperCase(Driver) = 'BDE' then begin
+    try
+      dbiInit(nil);
+    except
+      case Action of
+        acInstall: begin //silent install of BDE
+          if not InstallBDE(True) then FDialog.Start('Atentie', 'BDE nu s-a instalat cu success.', fdOk, 1)
+          else FDialog.Start('Atentie', 'BDE s-a instalat cu success.', fdOk, 2);
+        end;
+        acAskInstall: begin
+          if FDialog.Start('Atentie', 'BDE nu este instalat.' + #13 + 'Doriti sa-l instalati?', fdBtn_Yes or fdBtn_No, 3) = fdBtn_Yes then
+            if not InstallBDE(True) then FDialog.Start('Atentie', 'BDE nu s-a instalat cu success.', fdOk, 1)
+            else begin
+              FDialog.Start('Atentie', 'BDE s-a instalat cu success.', fdOk, 2);
+              Result := True;
+            end;
+        end;
+        acDoNothing: begin
+          ShowMessage('BDE nu este instalat.');
+          Exit;
+        end;
+      end;
+    end;
+    dbiExit;
+    Result := True;
+  end;
+end;
+
+function InstallODBC(Silent: boolean): boolean;
+var
+  SEInfo: TShellExecuteInfo;
+  ExitCode: DWORD;
+  ExecuteFile: string;
+  Keys: TStringList;
+  I: Integer;
+begin
+  Result := False;
+  if FileExists('MyODBC.exe') then ExecuteFile:='MyODBC.exe';
+  if FileExists('MyODBC.msi') then ExecuteFile:='MyODBC.msi';
+  if FileExists(ExecuteFile) then begin
+    FillChar(SEInfo, SizeOf(SEInfo), 0);
+    SEInfo.cbSize := SizeOf(TShellExecuteInfo);
+    with SEInfo do begin
+      fMask := SEE_MASK_NOCLOSEPROCESS;
+      Wnd := Application.Handle;
+      lpFile := PChar(ExecuteFile);
+      //lpParameters := PChar('/s');
+      nShow := SW_HIDE;
+    end;
+    if ShellExecuteEx(@SEInfo) then begin
+      repeat
+        Application.ProcessMessages;
+        GetExitCodeProcess(SEInfo.hProcess, ExitCode);
+      until (ExitCode <> STILL_ACTIVE) or Application.Terminated;
+    end ;
+    with TRegistry.Create do
+    try
+      Keys := TStringList.Create;
+      RootKey := HKEY_LOCAL_MACHINE;
+      if not OpenKey('\SOFTWARE\ODBC\ODBCINST.INI', False) then Exit;
+      GetKeyNames(Keys);
+      for I := 0 to Keys.Count - 1 do
+        if Pos('MySQL ODBC', Keys[I]) <> 0 then Result := True;
+      CloseKey;
+    finally
+      Free;
+      Keys.Free;
+    end;
+  end;
+end;
+
+function InstallBDE(Silent: boolean): boolean;
+var
+  SEInfo: TShellExecuteInfo;
+  ExitCode: DWORD;
+  ExecuteFile: string;
+begin
+  Result := True;
+  if FileExists('BDE.exe') then ExecuteFile:='BDE.exe';
+  if FileExists('BDE.msi') then ExecuteFile:='BDE.msi';
+  if FileExists(ExecuteFile) then begin
+    FillChar(SEInfo, SizeOf(SEInfo), 0);
+    SEInfo.cbSize := SizeOf(TShellExecuteInfo);
+    with SEInfo do begin
+      fMask := SEE_MASK_NOCLOSEPROCESS;
+      Wnd := Application.Handle;
+      lpFile := PChar(ExecuteFile);
+      //lpParameters := PChar('/s');
+      nShow := SW_HIDE;
+    end;
+    if ShellExecuteEx(@SEInfo) then begin
+      repeat
+        Application.ProcessMessages;
+        GetExitCodeProcess(SEInfo.hProcess, ExitCode);
+      until (ExitCode <> STILL_ACTIVE) or Application.Terminated;
+    end ;
+    try
+      dbiInit(nil);
+    except
+      Result := False;
+    end;
+  end;
+end;
+
+function StringToTStrings(Source: string; Separator: string): TStrings;
+var
+  Output: TStringList;
+begin
+  Output := TStringList.Create;
+  Output.Clear;
+  while Pos(Separator, Source) <> 0 do begin
+    Output.Add(Copy(Source, 1, Pos(Separator, Source) - 1));
+    Delete(Source, 1, Pos(Separator, Source) + Length(Separator) - 1);
+  end;
+  Output.Add(Source);
+  Result := Output;
+end;
+
+function TStringsToString(Source: TStrings; Separator: string): String;
+var
+  Output: String;
+  I: Integer;
+begin
+  Output := '';
+  for I := 0 to Source.Count - 2 do
+    Output := Output + Source[I] + Separator;
+  Output := Output + Source[Source.Count - 1];  
+  Result := Output;
+end;
+
+function VerifyCUI(CUI: string): boolean;
+var
+  Key: string;
+  I, Temp: integer;
+  Control: word;
+begin
+  Key := '235712357';
+  Result := False;
+  CUI := UpperCase(CUI);
+  if Pos('RO', CUI) <> 0 then CUI := Copy(CUI, 3, Length(CUI));
+  if Length(CUI) > 10 then Exit;
+  try Temp := StrToInt(CUI) except Exit; end;
+  Control := StrToInt(Copy(CUI, Length(CUI), Length(CUI)));
+  CUI := StringReverse(Copy(CUI, 1, Length(CUI) - 1));
+  Temp := 0;
+  for I := 1 to Length(CUI) do Temp := Temp + StrToInt(CUI[I]) * StrToInt(Key[I]);
+  if not ((((Temp * 10) mod 11) = Control) or (((((Temp * 10) mod 11) = 10) and (Control = 0)))) then Exit;
+  Result := True;
+end;
+
+function VerifyCNP(CNP: string): boolean;
+var
+  Key: string;
+  Temp: Int64;
+  I: Integer;
+  Control: word;
+begin
+  Key := '279146358279';
+  Result := False;
+  if Length(CNP) > 13 then Exit;
+  try Temp := StrToInt64(CNP) except Exit; end;
+  Control := StrToInt(Copy(CNP, Length(CNP), Length(CNP)));
+  Temp := 0;
+  for I := 1 to Length(CNP) - 1 do
+    Temp := Temp + StrToInt(CNP[I]) * StrToInt(Key[I]);
+  if not ((Control = Temp mod 11) or (Temp mod 11 = 10) and (Control = 1))  then Exit;
+  Result := True;
+end;
+
+function GetLastSpace(Text: string; Pos: integer): integer;
+var
+  I: integer;
+begin
+  if Length(Text) < Pos then begin Result := Length(Text); Exit end;
+
+  Result := 0;
+  I:= Pos;
+  repeat
+    if Text[I] in [' ', ','] then Result := I;
+    Dec(I);
+  until Result = I + 1;
+end;
+
+function SQLOpen(Query: TQuery; SQL: Widestring): Integer;
+var
+  Sir: string;
+  Temp: string;
+begin
+  Result := -1;
+  try
+    Query.Close;
+    Query.SQL.Clear;
+    Query.SQL.Add(SQL);
+    Query.Open;
+    Result := 0;
+    Exit;
+  except
+    on E: Exception do
+      Sir := E.Message;
+    else
+      Sir := 'La executie';
+  end;
+  Log('(' + Query.Name + ') ' + Temp + #13 + #10 + Sir, GetCurrentDir + LOG_FILE, LOGGING);
+end;
+
+function DoSQL(Query: TQuery; SQL: Widestring): Integer;
+begin
+  Result := -1;
+  if MainForm.SQLError then
+    Exit;
+  if not MainForm.DB.Connected then begin
+    try
+      MainForm.DB.Connected := True;
+    except
+      MainForm.SQLError := True;
+      FDialog.Start('Eroare','Configurare baza de date eronata sau baza date indisponibila.', fdOk, mtError);
+      Exit;
+    end;
+  end;
+  if Query = nil then Exit;
+  if Trim(SQL) = '' then Exit;
+  SQL := Trim(SQL);
+  if UpperCase(Copy(SQL, 1, Pos(' ', SQL) - 1)) = 'SELECT' then
+    Result := SQLOpen(Query, SQL)
+  else
+    Result := SQLExec(Query, SQL);
+end;
+
+function SQLExec(Query: TQuery; SQL: Widestring): Integer;
+var
+  Sir: string;
+  Temp: string;
+begin
+  Result:= 0;
+  if SQL = '' then Exit;
+  try
+    Query.Close;
+    Query.SQL.Clear;
+    Query.SQL.Add(SQL);
+    Query.ExecSQL;
+    Exit;
+  except
+    on E: Exception{EDBEngineError} do
+      begin
+        Sir := E.Message;
+      end
+    else
+      Sir := 'La executie';
+  end;
+  Log(Temp + #13 + #10 + Sir, GetCurrentDir + LOG_FILE, LOGGING);
+  Result := -1;
+end;
+
+procedure Log(Texts, Fisier: String; Log: Boolean);
+var
+  I: Byte;
+  F: TextFile;
+begin
+  if Log then
+  begin
+    AssignFile(F, Fisier);
+    if FileExists(Fisier) then Append(F)
+    else Rewrite(F);
+    Writeln(F, DateTimeToStr(Now) + ' | ' + #13 + #10 + Texts + #13 + #10);
+    CloseFile(F);
+  end;
+  I := Pos(']', Texts);
+  while I > 0 do
+    begin
+      Texts := Copy(Texts, I + 1, Length(Texts));
+      I := Pos(']', Texts);
+    end;
+  FDialog.Start('Eroare', Texts, fdOk, 1);
+//  MessageDlg(Texts, mtError, [mbOk], 0);
+end;
+
+function PuneSlash(Text: String): string;
+begin
+  if Text <> '' then
+    if Text[Length(Text)] <> '\' then Text := Text + '\';
+  Result := Text;
+end;
+
+function iif(Condition, Expr1, Expr2: variant): variant;
+begin
+  if Condition then Result := Expr1
+  else Result := Expr2;
+end;
+
+{function s2i(Source: string): variant; overload;
+begin
+  try Result := StrToInt(Source); finally end;
+end;}
+
+function s2i(Source: string): integer; overload;
+begin
+  try Result := StrToInt(Source); finally end;
+end;
+
+function i2s(Source: variant): string;
+begin
+  try Result := IntToStr(Source); finally end;
+end;
+
+function s2f(Source: string): variant;
+begin
+  Result := StrToFloatDef(Source, 0);
+end;
+
+function f2s(Source: variant): string;
+begin
+  Result := FloatToStr(Source);
+end;
+
+function myInc(var AInteger: integer; const Step: integer = 1): integer;
+begin
+  AInteger := AInteger + Step;
+end;
+
+function PopMsg(Text: string): TForm;
+var
+  AForm: TForm;
+  ALabel: TLabel;
+begin
+  AForm := TForm.Create(MainForm);
+  AForm.Color := MainForm.Color;
+  AForm.Caption := 'Informare';
+  AForm.Position := poMainFormCenter;
+  AForm.Height := 52;
+  AForm.BorderStyle := bsSingle;
+  AForm.BorderIcons := [];
+  ALabel := TLabel.Create(AForm);
+  ALabel.Parent := AForm;
+  ALabel.Font.Name := 'Segoe UI';
+  ALabel.Font.Size := 12;
+  ALabel.Caption := Text;
+  AForm.ClientWidth := ALabel.Canvas.TextWidth(Text) + 20;
+  ALabel.Top := 0;
+  ALabel.Left := 10;
+  Result := AForm;
+end;
+
+function HSL2RGB(HSL: THSLValue): TColor;
+  function _Hue2RGB(v1, v2, vH: extended): extended;
+  begin
+     if vH < 0 then vH := vH + 1;
+     if vH > 1 then vH := vH - 1;
+
+     if ((6*vH) < 1 ) then begin
+       Result := (v1 + (v2-v1) * 6*vH);
+       Exit;
+     end;
+
+     if (2*vH) < 1 then begin
+       Result := v2;
+       Exit;
+     end;
+
+     if (3*vH) < 2 then begin
+       Result := (v1 + (v2-v1) * ((2/3) - vH) * 6 );
+       Exit;
+     end;
+     Result :=   v1;
+  end;
+
+var
+  R, G, B: byte;
+  var1, var2: extended;
+
+begin
+  if HSL.S = 0 then begin
+    R := Round(HSL.L * 255);
+    G := Round(HSL.L * 255);
+    B := Round(HSL.L * 255);
+  end else begin
+    if HSL.L < 0.5 then var2 := HSL.L * (1+HSL.S)
+    else var2 := (HSL.L+HSL.S) - (HSL.S*HSL.L);
+
+    var1 := 2*HSL.L - var2;
+
+    R := Round(Min(255 * _Hue2RGB(var1, var2, HSL.H + (1/3)),255));
+    G := Round(Min(255 * _Hue2RGB(var1, var2, HSL.H),255));
+    B := Round(Min(255 * _Hue2RGB(var1, var2, HSL.H - (1/3)),255));
+  end;
+  Result := RGB(R, G, B);
+end;
+
+function RGB2HSL(AColor: TColor): THSLValue;
+var
+  pR, pG, pB: extended;
+  dR, dG, dB: extended;
+  dMin,dMax,dRGB: extended;
+begin
+  pR := GetRValue(AColor) / 255;                      //RGB from 0 to 255
+  pG := GetGValue(AColor) / 255;
+  pB := GetBValue(AColor) / 255;
+
+  dMin := Min(pR, pG);    //Min. value of RGB
+  dMin := Min(dMin, pB);
+  dMax := Max(pR, pG);    //Max. value of RGB
+  dMax := Max(dMax, pB);
+  dRGB := dMax - dMin;             //Delta RGB value
+
+  Result.L := (dMax + dMin ) / 2;
+
+  if dRGB = 0 then begin                    //This is a gray, no chroma...
+    Result.H := 0;                                //HSL results from 0 to 1
+    Result.S := 0;
+  end else begin                                   //Chromatic data...
+    if Result.L < 0.5 then
+      Result.S := dRGB / (dMax + dMin)
+    else
+      Result.S := dRGB / (2 - dMax - dMin);
+
+    dR := (((dMax-pR) / 6) + (dRGB/2)) / dRGB;
+    dG := (((dMax-pG) / 6) + (dRGB/2)) / dRGB;
+    dB := (((dMax-pB) / 6) + (dRGB/2)) / dRGB;
+
+    if pR = dMax then Result.H := dB - dG else
+    if pG = dMax then Result.H := (1/3) + dR - dB else
+    if pB = dMax then Result.H := (2/3) + dG - dR;
+
+    if Result.H < 0 then Result.H := Result.H + 1;
+    if Result.H > 1 then Result.H := Result.H - 1;
+  end;
+end;
+
+function GetMedianColor(c1, c2: integer; p: word): TColor;
+var
+  r,g,b: integer;
+  r1,g1,b1: integer;
+  r2,g2,b2: integer;
+begin
+  r1 := Hi(c1);
+  g1 := Lo(c1 shr 8);
+  b1 := Lo(c1);
+
+  r2 := Hi(c2);
+  g2 := Lo(c2 shr 8);
+  b2 := Lo(c2);
+
+//  if (r1 + g1 + b1) > (r2 + g2 + b2) then begin
+    r := Round(r1 * (p / 100) + r2 * ((100 - p) / 100));
+    g := Round(g1 * (p / 100) + g2 * ((100 - p) / 100));
+    b := Round(b1 * (p / 100) + b2 * ((100 - p) / 100));
+//  end else begin
+//    r := Round(r2 * (p / 100) + r1 * ((100 - p) / 100));
+//    g := Round(g2 * (p / 100) + g1 * ((100 - p) / 100));
+//    b := Round(b2 * (p / 100) + b1 * ((100 - p) / 100));
+//  end;
+  Result := r shl 16 + g shl 8 + b;
+
+//  r := Hi(c1) - Hi(c2);
+//  g := Lo(c1 shr 8) - Lo(c2 shr 8);
+//  b := Lo(c1) - Lo(c2);
+
+
+
+//  p := iif(r + g + b > 0, p, 100 - p);
+
+//  Result := Abs(Round(r * p / 100)) shl 16 +
+//                 Abs(Round(g * p / 100)) shl 8 +
+//                 Abs(Round(b * p / 100)) + iif(r + g + b < 0, c1, c2);
+end;
+
+function SQLString(Source: Widestring; Operation: string): Widestring;
+begin
+  if UpperCase(Operation) = 'CODE' then begin
+    Result := StringReplace(Source, '"', '&quot;', [rfReplaceAll]);
+    Result := StringReplace(Result, '''', '&squot;', [rfReplaceAll]);
+    Result := StringReplace(Result, '`', '&aquot;', [rfReplaceAll]);
+    Result := StringReplace(Result, '\', '\\', [rfReplaceAll]);
+  end else begin
+    Result := StringReplace(Source, '&squot;', '''', [rfReplaceAll]);
+    Result := StringReplace(Source, '&aquot;', '`', [rfReplaceAll]);
+    Result := StringReplace(Result, '&quot;', '"', [rfReplaceAll]);
+    //Result := StringReplace(Result, '\\', '\', [rfReplaceAll]);
+  end;
+end;
+
+function Cut(var AText: string; From, Distance: integer; const OffsetC: integer = 0; const OffsetD: integer = 0): string;
+begin
+  Result := Copy(AText, From, Distance - OffsetC);
+  Delete(AText, From, Distance + OffsetD);
+end;
+
+function GetDigits(AValue: string): integer;
+var
+  i: integer;
+  le: integer;
+begin
+  Result := 0;
+  i := 1;
+  le := l(AValue);
+  while i <= le do begin
+    if (byte(AValue[i]) >= 48) and (byte(AValue[i]) <= 57) then
+      Result := Result  * 10 + byte(AValue[i]) - 48;
+    Inc(i);
+  end;
+end;
+
+function l(Value: string): integer;
+begin
+  Result := Length(Value);
+end;
+
+function StringReverse(S: string): string;
+var
+  i: integer;
+begin
+   Result := '';
+   for i := Length(S) downto 1 do
+     Result := Result + S[i] ;
+end;
+
+function CountChr(const Chr: Char; S: string): Integer;
+var
+  i: Integer;
+begin
+  Result := 0;
+  for i := 1 to Length(S) do
+    if (S[i] = Chr) then Inc(Result, 1);
+end;
+
+function VerifyDate(Data: string): boolean;
+var
+  DateSep: char;
+  OldFormat: string;
+begin
+  Result := False;
+  DateSep := DateSeparator;
+  OldFormat := ShortDateFormat;
+  Data := StringReplace(Data,'/','.',[rfReplaceAll]);
+  ShortDateFormat := 'dd.mm.yyyy';
+  DateSeparator := '.';
+  if StrToDate(Data) <> 0 then Result := True;
+  DateSeparator :=DateSep;
+end;
+
+procedure VerifyAlias(Alias: String; Params: TAliasParams; Action: TVerifyAction);
+var
+  Keys : TStringList;
+  I : Integer;
+  Key: String;
+  Driver: string;
+begin
+  Key := '';
+  with TRegistry.Create do
+    try
+      Keys := TStringList.Create;
+      RootKey := HKEY_LOCAL_MACHINE;
+      if not OpenKey('\SOFTWARE\ODBC\ODBCINST.INI', False) then Exit;
+      GetKeyNames(Keys);
+      for I := 0 to Keys.Count - 1 do
+        if Pos('MySQL ODBC', Keys[I]) <> 0 then Key := Keys[I];
+      OpenKey('\SOFTWARE\ODBC\ODBCINST.INI\' + Key, False);
+      Driver := ReadString('Driver');
+      RootKey := HKEY_CURRENT_USER;
+      if not OpenKey('\SOFTWARE\ODBC\ODBC.INI\' + Alias, False) then begin
+        CreateKey('\SOFTWARE\ODBC\ODBC.INI\' + Alias);
+        OpenKey('\SOFTWARE\ODBC\ODBC.INI\' + Alias, False);
+        WriteString('Driver', Driver);
+        for I := 1 to 6 do
+          WriteString(Params[i * 2 - 1], Params[i*2]);
+      end;
+      OpenKey('\Software\ODBC\ODBC.INI\ODBC Data Sources', False);
+      WriteString(Alias, Key);
+    finally
+      Free;
+      Keys.Free;
+    end;
+end;
+
+procedure LoadForm(FileName: String; Sender: TObject);
+begin
+  (Sender as TForm).Color := FORM_COLOR;
+end;
+
+procedure SaveForm(FileName: String; Sender: TObject);
+var
+  IniFile: TIniFile;
+begin
+  IniFile := TIniFile.Create(FileName);
+  with IniFile do begin
+    WriteInteger('Form', 'Top', (Sender as TForm).Top);
+    WriteInteger('Form', 'Left', (Sender as TForm).Left);
+    WriteInteger('Form', 'Color', (Sender as TForm).Color);
+
+  end;
+  IniFile.Free;
+end;
+
+function GetThemeData(Theme: string): TMyTheme;
+var
+  Theme_File: TIniFile;
+  Temp: TMyTheme;
+  Aux: TFontStyles;
+  sAux: string;
+begin
+  if (not FileExists(GetCurrentDir + 'Date\Setari\Teme\' + Theme + '.ini')) or (Theme = '') then Theme := 'default';
+  Theme_File := TIniFile.Create(GetCurrentDir + '\Date\Setari\Teme\' + Theme + '.ini');
+  with Theme_File do begin
+    with Temp.Colors do begin
+      BorderColor := ReadInteger('RbBtnColors', 'BorderColor', $00E2873D);
+      ClickedFrom := ReadInteger('RbBtnColors', 'ClickedFrom', $00ECAF7D);
+      ClickedTo := ReadInteger('RbBtnColors', 'ClickedTo', $00E79654);
+      DefaultFrom := ReadInteger('RbBtnColors', 'DefaultFrom', $00F3CFB1);
+      DefaultTo := ReadInteger('RbBtnColors', 'DefaultTo', $00EBAD7A);
+      HotTrack := ReadInteger('RbBtnColors', 'HotTrack', $00FF0404);
+      OverFrom := ReadInteger('RbBtnColors', 'OverFrom', $00EDB587);
+      OverTo := ReadInteger('RbBtnColors', 'OverTo', $00EAA771);
+      TextShadow := ReadInteger('RbBtnColors', 'TextShadow', $00F0CAA1);
+    end;
+    Temp.FormColor := ReadInteger('Form', 'Color', $00F4D3B9);
+    Temp.Font.Name := ReadString('Font', 'Name', '');
+    Temp.Font.Size := ReadInteger('Font', 'Size', 8);
+    Temp.Font.Color := ReadInteger('Font', 'Color', $00000000);
+    sAux := ReadString('Font', 'Style', '1000');
+    Aux := [];
+    if sAux[1] = '1' then Aux := Aux + [fsBold];
+    if sAux[2] = '1' then Aux := Aux + [fsItalic];
+    if sAux[3] = '1' then Aux := Aux + [fsUnderline];                 
+    if sAux[4] = '1' then Aux := Aux + [fsStrikeOut];
+    Temp.Font.Style := Aux;
+    //GridFont
+    Temp.GridFont.Name := ReadString('GridFont', 'Name', '');
+    Temp.GridFont.Size := ReadInteger('GridFont', 'Size', 8);
+    Temp.GridFont.Color := ReadInteger('GridFont', 'Color', $00000000);
+    sAux := ReadString('GridFont', 'Style', '1000');
+    Aux := [];
+    if sAux[1] = '1' then Aux := Aux + [fsBold];
+    if sAux[2] = '1' then Aux := Aux + [fsItalic];
+    if sAux[3] = '1' then Aux := Aux + [fsUnderline];
+    if sAux[4] = '1' then Aux := Aux + [fsStrikeOut];
+    Temp.GridFont.Style := Aux;
+  end;
+  Theme_File.Free;
+  Result := Temp;
+end;
+
+function GetFirmaFromDBName(DBName: string): TFirma;
+begin
+  if DBName = 'fdsoft' then begin
+    Result := FirmaDSOFT; Exit;
+  end;
+  if DBName = 'fsoftware' then begin
+    Result := FirmaSOFTWARE; Exit;
+  end;
+  if DBName = 'fservices' then begin
+    Result := FirmaSERVICES; Exit;
+  end;
+  if DBName = 'quality' then begin
+    Result := FirmaQUALITY; Exit;
+  end;
+end;
+
+function MySQLDateToStr(Date: TDate; Format: string): string;
+begin
+  if (Format <> 'YYYY-MM-DD') and (Format <> 'yy-MM-DD') and (Format <> 'DD-MM-YYYY') then begin
+    Result := '';
+    Exit;
+  end;
+  if Format = 'YYYY-MM-DD' then
+    Result := FormatDateTime('yyyy-mm-dd', Date)
+  else
+    if Format = 'yy-MM-DD' then
+      Result := FormatDateTime('yy-mm-dd', Date)
+    else
+      Result := FormatDateTime('dd-mm-yyyy', Date)
+end;
+
+procedure GradientHorizontalMirror(ACanvas: TCanvas; ARect: TRect; AColor: TColor; const Delimiters: string = ''); overload;
+
+const
+  CM_DOWN = 0;
+  CM_UP = 1;
+  CM_LATERAL = 2;
+  CM_DELDARK_UP = 3;
+  CM_DELLIGHT_UP = 4;
+  CM_DELDARK_DOWN = 5;
+  CM_DELLIGHT_DOWN = 6;
+  
+  Up = 1.064152608848828;
+  Down = 1.153123755334804;
+  DownLine = 0.8619013521593215;
+  Lateral = 1.073356519078155;
+  DelDark = 0.8984375;
+  DelLight = 1.109375;
+var
+  ColorMap: array[0..255,0..6] of Byte;
+  Y,X: integer;
+  dRUp,dGUp,dBUp: byte;
+  dRDown,dGDown,dBDown: Extended;
+  C:TColor;
+  R,G,B:Byte;
+  R1,G1,B1:Byte;
+  R2,G2,B2:Byte;
+  cnt:Integer;
+ // ARect: TRect;
+  tsDelimiters: TStringList;
+  iTemp: SmallInt;
+begin
+  for Y := 0 to 255 do begin
+    ColorMap[Y][0] := Min(Round(Y*Down), 255); //R2;
+    ColorMap[Y][1] := Min(Round((255 - Min(Y*Up, 255))/9), 255); //dRUp;
+    ColorMap[Y][2] := Min(Round(Y*Lateral), 255); //Lateral;
+    ColorMap[Y][3] := Min(Round(Y*DelDark*Up), 255); //DelDarkUp;
+    ColorMap[Y][4] := Min(Round(Y*DelLight/Up), 255); //DelLightUp;
+    ColorMap[Y][5] := Round(Y*DelDark); //DelDarkDown;
+    ColorMap[Y][6] := Min(Round(Y*DelLight), 255); //DelLightDown;
+  end;
+
+  tsDelimiters := TStringList.Create;
+  tsDelimiters.CommaText := Delimiters;
+
+  //with APaintBox do begin
+
+    C := AColor;
+    //ARect := APaintBox.ClientRect;
+    R1 := GetRValue(C);
+    G1 := GetGValue(C);
+    B1 := GetBValue(C);
+
+    R2 := ColorMap[R1,0]; if R2 = 0 then R2 := Round(255 * Down) - 255;
+    G2 := ColorMap[G1,0]; if G2 = 0 then G2 := Round(255 * Down) - 255;
+    B2 := ColorMap[B1,0]; if B2 = 0 then B2 := Round(255 * Down) - 255;
+
+    iTemp := (ARect.Bottom-ARect.Top-12);
+
+    dRDown := (R2-R1) / iTemp;
+    dGDown := (G2-G1) / iTemp;
+    dBDown := (B2-B1) / iTemp;
+
+    dRUp := ColorMap[R1,1];
+    dGUp := ColorMap[G1,1];
+    dBUp := ColorMap[B1,1];
+
+    R := 255;
+    G := 255;
+    B := 255;
+
+    ACanvas.Pen.Color := RGB(160, 160, 160);
+    ACanvas.MoveTo(ARect.Left,ARect.Top);
+    ACanvas.LineTo(ARect.Right - 1,ARect.Top);
+    ACanvas.LineTo(ARect.Right - 1,ARect.Bottom - 1);
+    ACanvas.LineTo(ARect.Left,ARect.Bottom - 1);
+    ACanvas.LineTo(ARect.Left,ARect.Top);
+    ACanvas.Pen.Color := RGB(255, 255, 255);
+    ACanvas.MoveTo(ARect.Left + 1,ARect.Top + 1);
+    ACanvas.LineTo(ARect.Right + 1,ARect.Top + 1);
+
+    for Y := ARect.Top + 2 to ARect.Top + 10 do begin
+      R := R - dRUp;
+      G := G - dGUp;
+      B := B - dBUp;
+
+      ACanvas.Pen.Color := RGB(ColorMap[R,2], ColorMap[G,2], ColorMap[B,2]);
+      ACanvas.MoveTo(ARect.Left + 1,Y);
+      ACanvas.LineTo(ARect.Left + 2,Y);
+      ACanvas.Pen.Color := RGB(R,G,B);
+      if Y >= 4 then
+        for X  := 0 to tsDelimiters.Count - 1 do begin
+          iTemp := StrToInt(tsDelimiters[X]);
+          ACanvas.LineTo(ARect.Left + iTemp - 1,Y);
+          ACanvas.Pen.Color := RGB(ColorMap[R,3], ColorMap[G,3], ColorMap[B,3]);
+          ACanvas.LineTo(ARect.Left + iTemp,Y);
+          ACanvas.Pen.Color := RGB(ColorMap[R,4], ColorMap[G,4], ColorMap[B,4]);
+          ACanvas.LineTo(ARect.Left + iTemp + 1,Y);
+          ACanvas.Pen.Color := RGB(R,G,B);
+        end;
+      ACanvas.LineTo(ARect.Right-2,Y);
+      ACanvas.Pen.Color := RGB(ColorMap[R,2], ColorMap[G,2], ColorMap[B,2]);
+      ACanvas.LineTo(ARect.Right-1,Y);
+    end;
+
+    cnt := 0;
+    for Y := ARect.Top + 11 to ARect.Bottom - 3 do
+    begin
+      R := R1+Ceil(dRDown*cnt) ;
+      G := G1+Ceil(dGDown*cnt) ;
+      B := B1+Ceil(dBDown*cnt) ;
+
+      ACanvas.Pen.Color := RGB(ColorMap[R,2], ColorMap[G,2], ColorMap[B,2]);
+      ACanvas.MoveTo(ARect.Left + 1,Y);
+      ACanvas.LineTo(ARect.Left + 2,Y);
+      ACanvas.Pen.Color := RGB(R,G,B);
+      if Y <= ARect.Bottom - 3 - 4 then
+        for X  := 0 to tsDelimiters.Count - 1 do begin
+          iTemp := StrToInt(tsDelimiters[X]);
+          ACanvas.LineTo(ARect.Left + iTemp - 1,Y);
+          ACanvas.Pen.Color := RGB(ColorMap[R,5], ColorMap[G,5], ColorMap[B,5]);
+          ACanvas.LineTo(ARect.Left + iTemp,Y);
+          ACanvas.Pen.Color := RGB(ColorMap[R,6], ColorMap[G,6], ColorMap[B,6]);
+          ACanvas.LineTo(ARect.Left + iTemp + 1,Y);
+          ACanvas.Pen.Color := RGB(R,G,B);
+        end;
+      ACanvas.LineTo(ARect.Right-2, Y);
+      ACanvas.Pen.Color := RGB(ColorMap[R,2], ColorMap[G,2], ColorMap[B,2]);
+      ACanvas.LineTo(ARect.Right - 1,Y);
+      Inc(cnt) ;
+    end;
+    ACanvas.Pen.Color := RGB(Min(Round(R * DownLine),255), Min(Round(G * DownLine),255), Min(Round(B * DownLine),255));
+    ACanvas.MoveTo(ARect.Left + 1,ARect.Bottom - 2) ;
+    ACanvas.LineTo(ARect.Right - 1,ARect.Bottom - 2) ;
+  //end;
+  tsDelimiters.Free;
+end;  {GradientHorizontalMirror}
+
+procedure GradientHorizontalMirror(APaintBox: TPaintBox; const Delimiters: string = ''); overload;
+begin
+  GradientHorizontalMirror(APaintBox.Canvas, APaintBox.ClientRect, APaintBox.Color, Delimiters);
+end;
+
+procedure GradientHorizontalFooter(APaintBox: TPaintBox; const Delimiters: string = '');
+const
+  Dark = 0.8984375;
+  Light = 1.109375;
+var
+  X, Y: integer;
+  dR,dG,dB: byte;
+  C:TColor;
+  R1,G1,B1:Byte;
+  R2,G2,B2:Byte;
+  ARect: TRect;
+  tsDelimiters: TStringList;
+  iTemp: integer;
+begin
+  tsDelimiters := TStringList.Create;
+  tsDelimiters.CommaText := Delimiters;
+  with APaintBox do begin
+    C := APaintBox.Color;
+    ARect := ClientRect;
+    R1 := GetRValue(C);
+    G1 := GetGValue(C);
+    B1 := GetBValue(C);
+
+    R2 := Min(Round(R1 * Dark),255); //if R2 = 0 then R2 := Round(255 * Down) - 255;
+    G2 := Min(Round(G1 * Dark),255); //if G2 = 0 then G2 := Round(255 * Down) - 255;
+    B2 := Min(Round(B1 * Dark),255); //if B2 = 0 then B2 := Round(255 * Down) - 255;
+
+    dR := R1 - R2;
+    dG := G1 - G2;
+    dB := B1 - B2;
+
+    for Y := ARect.Top to ARect.Bottom - 1 do begin
+      R2 := R2 + Ceil(dR / 2);
+      dR := dR div 2;
+      G2 := G2 + Ceil(dG / 2);
+      dG := dG div 2;
+      B2 := B2 + Ceil(dB / 2);
+      dB := dB div 2;
+
+      Canvas.Pen.Color := RGB(R2,G2,B2);
+      Canvas.MoveTo(ARect.Left,Y);
+      for X  := 0 to tsDelimiters.Count - 1 do begin
+          iTemp := StrToInt(tsDelimiters[X]);
+          Canvas.LineTo(ARect.Left + iTemp - 1,Y);
+          Canvas.Pen.Color := RGB(Round(R2*Dark), Round(G2*Dark), Round(B2*Dark));
+          Canvas.LineTo(ARect.Left + iTemp,Y);
+          Canvas.Pen.Color := RGB(Min(Round(R2*Light),255), Min(Round(G2*Light),255), Min(Round(B2*Light),255));
+          Canvas.LineTo(ARect.Left + iTemp + 1,Y);
+          Canvas.Pen.Color := RGB(R2,G2,B2);
+        end;
+      Canvas.LineTo(ARect.Right,Y);
+    end;
+  end;
+  tsDelimiters.Free;
+end;
+
+procedure GradientHorizontalMirrorExp(APaintBox: TPaintBox);
+const
+  Dark = 2;
+  Down = 1.153123755334804;
+var
+  Y: integer;
+  dR,dG,dB: byte;
+  C:TColor;
+  R1,G1,B1:Byte;
+  R2,G2,B2:Byte;
+  ARect: TRect;
+begin
+  with APaintBox do begin
+    C := APaintBox.Color;
+    ARect := ClientRect;
+    R1 := Round(GetRValue(C) * 1); //if R1 = 0 then R1 := Round(255 * Down) - 255;
+    G1 := Round(GetGValue(C) * 1); //if G1 = 0 then G1 := Round(255 * Down) - 255;
+    B1 := Round(GetBValue(C) * 1); //if B1 = 0 then B1 := Round(255 * Down) - 255;
+
+    R2 := Min(Round(R1 * Down),255); if R2 = 0 then R2 := Round(255 * Down) - 255;
+    G2 := Min(Round(G1 * Down),255); if G2 = 0 then G2 := Round(255 * Down) - 255;
+    B2 := Min(Round(B1 * Down),255); if B2 = 0 then B2 := Round(255 * Down) - 255;
+
+    {dR := R1 - R2;
+    dG := G1 - G2;
+    dB := B1 - B2;}
+
+    Canvas.Pen.Color := RGB(255,255,255);
+    Canvas.MoveTo(ARect.Left,0);
+    Canvas.LineTo(ARect.Right,0);
+    Canvas.Pen.Color := RGB(Round((R2 * Down + R2)/2),Round((G2*Down+G2)/2),Round((B2*Down+B2)/2));
+    Canvas.MoveTo(ARect.Left,1);
+    Canvas.LineTo(ARect.Right,1);
+
+    for Y := ARect.Top + 2 to ARect.Bottom - 3 do begin
+      {if Y > ARect.Bottom - 6 then begin
+        dR := Round((R1 - R2) * 1.2);
+        dG := Round((G1 - G2) * 1.2);
+        dB := Round((B1 - B2) * 1.2);
+      end;    }
+      {R2 := R2 - Ceil(dR / 2);
+      dR := dR div 2;
+      G2 := G2 - Ceil(dG / 2);
+      dG := dG div 2;
+      B2 := B2 - Ceil(dB / 2);
+      dB := dB div 2;}
+
+      Canvas.Pen.Color := RGB(R2,G2,B2);
+      Canvas.MoveTo(ARect.Left,Y);
+      Canvas.LineTo(ARect.Right,Y);
+    end;
+    Canvas.Pen.Color := RGB(Round(R2 / Dark),Round(G2/Dark),Round(B2/Dark));
+    Canvas.MoveTo(ARect.Left,ARect.Bottom - 1);
+    Canvas.LineTo(ARect.Right,ARect.Bottom - 1);
+    Canvas.Pen.Color := RGB(Round((R2 / Dark + R2)/2),Round((G2/Dark+G2)/2),Round((B2/Dark+B2)/2));
+    Canvas.MoveTo(ARect.Left,ARect.Bottom - 2);
+    Canvas.LineTo(ARect.Right,ARect.Bottom - 2);
+  end;
+end;
+
+end.

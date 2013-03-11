@@ -1,0 +1,140 @@
+12/9/2011 12:49:13 PM | 
+
+General SQL error.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11-nt]You have an error in your SQL syntax; check the manual that corresponds to your
+MySQL server version for the right syntax to use near ')' at line 1
+
+12/9/2011 12:49:20 PM | 
+(QFact) 
+General SQL error.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11-nt]Unknown table 'FD' in field list
+
+12/16/2011 10:13:43 AM | 
+
+General SQL error.
+[MySQL][ODBC 3.51 Driver]Unknown MySQL server host 'server' (11004)
+Alias: dsTest
+
+12/16/2011 10:13:52 AM | 
+
+General SQL error.
+[MySQL][ODBC 3.51 Driver]Unknown MySQL server host 'server' (11004)
+Alias: dsTest
+
+12/16/2011 10:14:01 AM | 
+
+General SQL error.
+[MySQL][ODBC 3.51 Driver]Unknown MySQL server host 'server' (11004)
+Alias: dsTest
+
+12/16/2011 10:14:08 AM | 
+
+General SQL error.
+[MySQL][ODBC 3.51 Driver]Unknown MySQL server host 'server' (11004)
+Alias: dsTest
+
+12/16/2011 12:18:56 PM | 
+(QGest) 
+General SQL error.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11-nt]Lost connection to MySQL server during query
+
+12/16/2011 1:56:35 PM | 
+() 
+General SQL error.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11-nt]Lost connection to MySQL server during query
+
+12/16/2011 1:59:05 PM | 
+() 
+General SQL error.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11-nt]Lost connection to MySQL server during query
+
+12/20/2011 9:33:02 AM | 
+(QFact) 
+Invalid field name.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11-nt]Unknown column 'STARE' in 'field list'
+
+12/22/2011 3:48:53 PM | 
+(QFact) 
+Table does not exist.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11-nt]Table 'test.fur' doesn't exist
+
+12/22/2011 3:50:40 PM | 
+(QFact) 
+Table does not exist.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11-nt]Table 'test.fur' doesn't exist
+
+12/22/2011 4:01:41 PM | 
+(q) 
+Invalid use of keyword.
+Token: select
+Line Number: 1
+
+12/22/2011 4:02:45 PM | 
+(q) 
+Invalid use of keyword.
+Token: select
+Line Number: 1
+
+12/22/2011 4:07:53 PM | 
+(q) 
+Invalid use of keyword.
+Token: SELECT
+Line Number: 1
+
+01.06.2012 1:40:38 PM | 
+
+General SQL error.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11]You have an error in your SQL syntax; check the manual that corresponds to your MySQL
+server version for the right syntax to use near 'NRDFC` (`NRDFC`),KEY `CODFC` (`CODFC`) ) ENGINE=InnoDB DEFAULT
+CHARSET=latin1' at line 1
+
+01.06.2012 1:40:41 PM | 
+
+Table does not exist.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11]Table 'fservices.tmpfres' doesn't exist
+
+6/1/2012 2:35:08 PM | 
+
+General SQL error.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11]You have an error in your SQL syntax; check the manual that corresponds to your MySQL
+server version for the right syntax to use near 'NRDFC` (`NRDFC`),KEY `CODFC` (`CODFC`) ) ENGINE=InnoDB DEFAULT
+CHARSET=latin1' at line 1
+
+6/1/2012 2:35:11 PM | 
+
+Table does not exist.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11]Table 'fservices.tmpfres' doesn't exist
+
+01.06.2012 2:42:58 PM | 
+
+General SQL error.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11]You have an error in your SQL syntax; check the manual that corresponds to your MySQL
+server version for the right syntax to use near '' at line 1
+
+01.06.2012 2:43:29 PM | 
+
+General SQL error.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11]You have an error in your SQL syntax; check the manual that corresponds to your MySQL
+server version for the right syntax to use near '' at line 1
+
+01.06.2012 2:44:19 PM | 
+
+General SQL error.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11]You have an error in your SQL syntax; check the manual that corresponds to your MySQL
+server version for the right syntax to use near '' at line 1
+
+6/1/2012 4:18:19 PM | 
+(QGest) 
+Table does not exist.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11]Table 'fservices.fres0513' doesn't exist
+
+1/18/2013 12:02:42 PM | 
+(QGest) 
+Table does not exist.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11]Table 'quality.fres1000' doesn't exist
+
+1/18/2013 12:02:49 PM | 
+(QGest) 
+Table does not exist.
+[MySQL][ODBC 3.51 Driver][mysqld-4.1.11]Table 'quality.fres1000' doesn't exist
+

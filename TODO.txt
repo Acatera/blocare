@@ -1,0 +1,42 @@
+[x] Export 
+[x] Send PDF to mail
+[X] Importa contactele din managerul vechi
+[X] Fara email duplicat
+[X] Users
+[X] Trimite extrase cont la clienti selectati
+[X] Posibilitate echivalare contact importat cu client din gestiune
+[X] Default mail settings
+[X] User signatures
+[X] Save and restore mail message
+[X] Parola
+[X] Factura pe mail
+[X] Detali partener
+[X] Sesizari
+[X] Fisa client - selectare baza date
+[X] Rezolva "Cu blocati"
+[X] Studiu de caz - posibilitate  folosire agenda Misu
+[X] Ascundere manager/gestiune
+[X] De trimis actualizari programe la deblocare
+[X] La importare mail sa nu stearga lista curenta de adrese
+[X] Mail la expirarea celor 2 luni
+[X] Modificare frecv (Tip_Contact in TIP3)
+[X] Importare text client
+[X] Adaugare frecventa "DERANJARI"
+[X] Refresh from gestiune
+[X] Modele presetate la trimitere mail
+[X] Filtrul pe clienti blocati
+[X] Posibilitate afisare toate facturile emise
+[X] Posibilitate afisare toate miscarile efectuate pentru clientul respectiv in luna curenta
+[X] Optimizare trimitere mail
+[X] Salvare mailuri trimise
+[X] Verificare clienti blocati (nr. fact. restante & ultima luna facturata)
+[X] Revizuieste trimiterea de mailuri. Mail queue.
+[x] La blocare sa trimita atasate facturile restante
+
+
+[\] Numar statii per client
+[\] Adaugare posibilitate selectare actiuni la pornire
+[\] Visual updates
+[ ] Locate
+[ ] Trimite pe mail facturile restante mai vechi de <data>
+[ ] Relistare chitante

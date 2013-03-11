@@ -1,0 +1,215 @@
+object JurClienti: TJurClienti
+  Left = 0
+  Top = 0
+  Caption = 'Jurnal clienti'
+  ClientHeight = 259
+  ClientWidth = 439
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnKeyPress = FormKeyPress
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 16
+  object Label1: TLabel
+    Left = 2
+    Top = 44
+    Width = 87
+    Height = 16
+    Caption = 'Metoda contact'
+  end
+  object Label2: TLabel
+    Left = 136
+    Top = 44
+    Width = 102
+    Height = 16
+    Caption = 'Durata interventie'
+  end
+  object Label3: TLabel
+    Left = 306
+    Top = 44
+    Width = 78
+    Height = 16
+    Caption = 'Data curenta:'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+  end
+  object Label4: TLabel
+    Left = 306
+    Top = 92
+    Width = 59
+    Height = 16
+    Caption = 'Data apel:'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+  end
+  object Label5: TLabel
+    Left = 2
+    Top = 135
+    Width = 87
+    Height = 16
+    Caption = 'Metoda contact'
+  end
+  object CTip: TListBox
+    Left = 2
+    Top = 63
+    Width = 128
+    Height = 72
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ItemHeight = 16
+    Items.Strings = (
+      'Telefonic'
+      'LogMeIn'
+      'Calculator adus'
+      'Deplasare la client')
+    ParentFont = False
+    TabOrder = 0
+    OnKeyPress = CTipKeyPress
+  end
+  object CDurata: TListBox
+    Left = 136
+    Top = 63
+    Width = 165
+    Height = 72
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ItemHeight = 16
+    Items.Strings = (
+      'Scurta (0 - 10 minute)'
+      'Medie (10 - 30 minute)'
+      'Lunga (30 minute - 2 ore)'
+      'Foarte lunga (peste 2 ore)')
+    ParentFont = False
+    TabOrder = 1
+    OnKeyPress = CDurataKeyPress
+  end
+  object Btn_Apply: TButton
+    Left = 127
+    Top = 230
+    Width = 75
+    Height = 25
+    Caption = 'Salveaza'
+    TabOrder = 2
+    OnClick = Btn_ApplyClick
+  end
+  object Btn_Renunta: TButton
+    Left = 239
+    Top = 230
+    Width = 75
+    Height = 25
+    Caption = 'Renunta'
+    TabOrder = 3
+    OnClick = Btn_RenuntaClick
+  end
+  object ECOD_FISCAL: TLabeledEdit
+    Left = 2
+    Top = 19
+    Width = 128
+    Height = 24
+    TabStop = False
+    EditLabel.Width = 60
+    EditLabel.Height = 16
+    EditLabel.Caption = 'Cod fiscal:'
+    EditLabel.Font.Charset = DEFAULT_CHARSET
+    EditLabel.Font.Color = clWindowText
+    EditLabel.Font.Height = -13
+    EditLabel.Font.Name = 'Tahoma'
+    EditLabel.Font.Style = []
+    EditLabel.ParentFont = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 6
+    OnKeyPress = EditKeyPress
+  end
+  object EDENFUR: TLabeledEdit
+    Left = 136
+    Top = 19
+    Width = 300
+    Height = 24
+    TabStop = False
+    EditLabel.Width = 60
+    EditLabel.Height = 16
+    EditLabel.Caption = 'Denumire:'
+    EditLabel.Font.Charset = DEFAULT_CHARSET
+    EditLabel.Font.Color = clWindowText
+    EditLabel.Font.Height = -13
+    EditLabel.Font.Name = 'Tahoma'
+    EditLabel.Font.Style = []
+    EditLabel.ParentFont = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 7
+    OnKeyPress = EditKeyPress
+  end
+  object DCurenta: TDateTimePicker
+    Left = 306
+    Top = 63
+    Width = 130
+    Height = 24
+    Date = 40248.487932395830000000
+    Time = 40248.487932395830000000
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 5
+  end
+  object DApel: TDateTimePicker
+    Left = 306
+    Top = 111
+    Width = 130
+    Height = 24
+    Date = 40248.487932395830000000
+    Time = 40248.487932395830000000
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 4
+  end
+  object MDescriere: TMemo
+    Left = 2
+    Top = 152
+    Width = 434
+    Height = 74
+    TabOrder = 8
+  end
+  object Query: TQuery
+    DatabaseName = 'dsTest'
+    Left = 8
+    Top = 160
+  end
+end

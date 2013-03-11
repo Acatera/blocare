@@ -1,0 +1,551 @@
+unit E_Mail;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, DB, DBTables, StdCtrls, Mask, DBCtrls, Grids, DBGrids, ExtCtrls;
+
+type
+  TEMail = class(TForm)
+    QMail: TQuery;
+    DSMail: TDataSource;
+    LContact: TLabel;
+    STARE: TShape;
+    LStare: TLabel;
+    MODULE: TLabeledEdit;
+    DBContact: TDBGrid;
+    EDenFC: TLabeledEdit;
+    EAdr: TLabeledEdit;
+    EEMail: TLabeledEdit;
+    EFax: TLabeledEdit;
+    ETel: TLabeledEdit;
+    Btn_Salvare: TButton;
+    Btn_Renunta: TButton;
+    PBottom: TPanel;
+    Title: TLabel;
+    ECauta: TEdit;
+    TempDB: TDBGrid;
+    Btn_Echiv: TButton;
+    ECauta2: TEdit;
+    procedure FormShow(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    function GetModuleName(No: integer): string;
+    procedure MODULEKeyPress(Sender: TObject; var Key: Char);
+    procedure DBContactKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure Btn_RenuntaClick(Sender: TObject);
+    procedure Btn_SalvareClick(Sender: TObject);
+    procedure ECautaKeyPress(Sender: TObject; var Key: Char);
+    procedure DBContactKeyPress(Sender: TObject; var Key: Char);
+    procedure ECautaExit(Sender: TObject);
+    procedure DBContactDrawDataCell(Sender: TObject; const Rect: TRect;
+      Field: TField; State: TGridDrawState);
+    procedure DBContactDrawColumnCell(Sender: TObject; const Rect: TRect;
+      DataCol: Integer; Column: TColumn; State: TGridDrawState);
+    procedure DBContactDblClick(Sender: TObject);
+    procedure EditEnter(Sender: TObject);
+    procedure EditExit(Sender: TObject);
+    procedure EditKeyPress(Sender: TObject; var Key: Char);
+    procedure EEMailKeyPress(Sender: TObject; var Key: Char);
+    procedure FirmePopulate;
+    procedure EDenFCKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure EDenFCExit(Sender: TObject);
+    procedure TempDBDblClick(Sender: TObject);
+    procedure TempDBKeyPress(Sender: TObject; var Key: Char);
+    procedure Btn_EchivClick(Sender: TObject);
+    procedure ECauta2KeyPress(Sender: TObject; var Key: Char);
+    procedure ECauta2Exit(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    function Start(CodFur, Stare: string; Module: integer): integer;
+    { Public declarations }
+  end;
+
+var
+  EMail: TEMail;
+  sCodFC: string;
+  State: integer;
+  CQuery: TQuery;
+  Blocat: string;
+  iModule: integer;
+  Clienti: TStringList;
+  TempQuery: TQuery;
+  TempDS: TDataSource;
+  sStare: string;
+
+implementation
+
+uses DContact, Sesiz_Detail, Fur_Detail, FMain, Dialog;
+
+{$R *.dfm}
+
+procedure TEMail.Btn_EchivClick(Sender: TObject);
+var
+  QAux: TQuery;
+  SQL: string;
+  I: integer;
+begin
+  if Btn_Echiv.Tag = 0 then begin //Echivalare
+    if TempQuery = nil then TempQuery := TQuery.Create(EMail);
+    TempQuery.DatabaseName := MainForm.DB.DatabaseName;
+    SQL := 'SELECT DISTINCT * FROM (';
+    for I := 0 to MainForm.CGest.Items.Count - 1 do
+           SQL := SQL + 'SELECT DENFUR, CODFUR, FTIP, SECTIA, CONCAT(CONT_DM, CONT_USD) AS CONTRACT, ADRF, TELEFON, EMAIL FROM `' + MainForm.CGest.Items[I] + '`.`FUR` UNION ALL ';
+        TempQuery.SQL.Text := Copy(SQL, 1, Length(SQL) - 11) + ') AS TEMP GROUP BY CODFUR, DENFUR ORDER BY DENFUR, CONTRACT';
+    TempQuery.Active := True;
+    TempDS := TDataSource.Create(EMail);
+    TempDS.DataSet := TempQuery;
+    TempDB.Height := 242;
+    TempDB.DataSource := TempDS;
+    TempDB.Visible := True;
+    TempDB.SetFocus;
+  end else begin //Partner details
+    QAux := TQuery.Create(EMail);
+    QAux.DatabaseName := MainForm.DB.DatabaseName;
+    SQL := 'SELECT CODFUR, DENFUR, SECTIA AS STARE, COUNT(CODFUR) AS NRFACT, SUM(SUMADB-SUMACR) AS SUMA, FIRMA, CONTRACT ' +
+           'FROM (SELECT * FROM (';
+    for I := 0 to MainForm.CGest.Items.Count - 1 do
+      SQL := SQL +
+        'SELECT CODFUR, DENFUR, SECTIA, SUMADB, SUMACR, "' + MainForm.CGest.Items[I] + '" AS FIRMA, CONCAT(CONT_DM, CONT_USD) AS CONTRACT ' +
+        'FROM `' + MainForm.CGest.Items[I] + '`.`FUR` INNER JOIN `' + MainForm.CGest.Items[I] + '`.`FRES' + SDate + '` ON CODFUR = CODFC ' +
+        'WHERE (CONTFC="4111") AND ((SUMADB-SUMACR) <> 0) AND (CODFUR = "' + EDenFC.Hint + '") UNION ALL ';
+    SQL := Copy(SQL, 1, Length(SQL) - 11) + ') AS TEMP ORDER BY CONTRACT DESC) AS TEMP2 GROUP BY CODFUR';
+    QAux.SQL.Text := SQL;
+    QAux.Open;
+    if QAux.RecordCount = 0 then begin
+    SQL := 'SELECT CODFUR, DENFUR, SECTIA AS STARE, FIRMA, CONTRACT ' +
+           'FROM (SELECT * FROM(';
+    for I := 0 to MainForm.CGest.Items.Count - 1 do
+      SQL := SQL +
+        'SELECT CODFUR, DENFUR, SECTIA, "' + MainForm.CGest.Items[I] + '" AS FIRMA, CONCAT(CONT_DM, CONT_USD) AS CONTRACT ' +
+        'FROM `' + MainForm.CGest.Items[I] + '`.`FUR` ' +
+        'WHERE (CODFUR = "' + EDenFC.Hint + '") UNION ALL ';
+      SQL := Copy(SQL, 1, Length(SQL) - 11) + ') AS TEMP ORDER BY CONTRACT DESC) AS TEMP2 GROUP BY CODFUR';
+      QAux.SQL.Text := SQL;
+      QAux.Open;
+      FurDetail.Start(SDate, QAux.Fields[0].AsString, QAux.Fields[1].AsString, QAux.Fields[2].AsString, '0', '0', QAux.Fields[3].AsString);
+    end else
+      FurDetail.Start(SDate, QAux.Fields[0].AsString, QAux.Fields[1].AsString, QAux.Fields[2].AsString, QAux.Fields[3].AsString, QAux.Fields[4].AsString, QAux.Fields[5].AsString);
+    QAux.Free;
+  end;
+end;
+
+procedure TEMail.Btn_RenuntaClick(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TEMail.Btn_SalvareClick(Sender: TObject);
+begin
+  if State = 1 then begin
+    QMail.SQL.Text := 'UPDATE `DBCABCONTA`.`FUR` SET ' +
+                      //'CODFC = "' + EDenFC.Hint + '", ' +
+                      'DENFC = "' + EDenFC.Text + '", ' +
+                      'ADR = "' + EAdr.Text + '", ' +
+                      'EMAIL = "' + EEMail.Text + '", ' +
+                      'TEL = "' + ETel.Text + '", ' +
+                      'FAX = "' + EFax.Text + '" WHERE CODFC = "' + sCodFC + '"';
+  end else begin
+    QMail.SQL.Text := 'INSERT INTO `DBCABCONTA`.`FUR` (CODFC, DENFC, ADR, EMAIL, TEL, FAX) VALUES ("' +
+                      EDenFC.Hint + '", "' +
+                      EDenFC.Text + '", "' +
+                      EAdr.Text + '", "' +
+                      EEMail.Text + '", "' +
+                      ETel.Text + '", "' +
+                      EFax.Text + '")';
+    //QMail.ExecSQL;
+    {QMail.SQL.Text := 'SELECT CODFC FROM `DBCABCONTA`.`FUR` WHERE (DENFC = "' +
+                       EDenFC.Text + '") AND (ADR = "' +
+                       EAdr.Text + '") AND (EMAIL = "' +
+                       EEMail.Text + '") AND (TEL = "' +
+                       ETel.Text + '") AND (FAX = "' +
+                       EFax.Text + '")';
+    QMail.Open;
+    sCodFC := QMail.FieldByName('CODFC').AsString;  }
+    //sCodFC := EDenFC.Hint;
+    //QMail.SQL.Text := 'INSERT INTO `DBCABCONTA`.`ECHIV` VALUES ("' + EDenFC.Hint + '", ' + sCodFC + ')';
+  end;
+  QMail.ExecSQL;
+  Close;
+end;
+
+procedure TEMail.DBContactDblClick(Sender: TObject);
+begin
+  Contact.Start(sCodFC, EDenFC.Text, CQuery.FieldByName('ID').AsString, sStare, iModule);
+  CQuery.SQL.Text := 'SELECT * FROM `DBCABCONTA`.`CONTACT` WHERE CODFC="' + sCodFC + '"';
+  CQuery.Active := True;
+end;
+
+procedure TEMail.DBContactDrawColumnCell(Sender: TObject; const Rect: TRect;
+  DataCol: Integer; Column: TColumn; State: TGridDrawState);
+var
+  S: string;
+  ARect: TRect;
+begin
+  if CQuery.RecordCount = 0 then Exit;
+  S := StringReplace(Column.Field.Text, '&', '&&', [rfReplaceAll]);
+  ARect := Rect;
+  if Rect.Top = 0 then Exit;
+  if gdSelected in State then (Sender as TDBGrid).Canvas.Brush.Color := PozCur;
+  (Sender as TDBGrid).Canvas.FillRect(Rect);
+  ARect.Left := Rect.Left + 2;
+  DrawText((Sender as TDBGrid).Canvas.Handle, PChar(S), Length(S), ARect, 0);
+end;
+
+procedure TEMail.DBContactDrawDataCell(Sender: TObject; const Rect: TRect;
+  Field: TField; State: TGridDrawState);
+var
+  S: string;
+  ARect: TRect;
+begin
+  if CQuery.RecordCount = 0 then Exit;
+  S := StringReplace(Field.Text, '&', '&&', [rfReplaceAll]);
+  ARect := Rect;
+  if Rect.Top = 0 then Exit;
+  if gdSelected in State then (Sender as TDBGrid).Canvas.Brush.Color := PozCur;
+  (Sender as TDBGrid).Canvas.FillRect(Rect);
+  ARect.Left := Rect.Left + 2;
+  DrawText((Sender as TDBGrid).Canvas.Handle, PChar(S), Length(S), ARect, 0);
+end;
+
+procedure TEMail.DBContactKeyPress(Sender: TObject; var Key: Char);
+begin
+  if not (Key in [' ', #13]) then begin
+    with ECauta do begin
+      Visible := True;
+      Tag := 112;
+      Text := Key;
+      CQuery.Locate('DENFC', ECauta.Text, [loCaseInsensitive, loPartialKey]);
+      SetFocus;
+      SelStart := 2;
+    end;
+  end;
+  if Key = #13 then Contact.Start(sCodFC, EDenFC.Text, CQuery.FieldByName('ID').AsString, Blocat, iModule)
+end;
+
+procedure TEMail.FirmePopulate;
+var
+  SQLText: String;
+  I: integer;
+  QTemp: TQuery;
+begin
+  QTemp := TQuery.Create(EMail);
+  QTemp.DatabaseName := MainForm.DB.DatabaseName;
+  SQLText := 'SELECT DISTINCT DENFUR, CODFUR FROM (';
+  for I := 0 to MainForm.CGest.Items.Count - 1 do
+    SQLText := SQLText + 'SELECT DENFUR, CODFUR FROM `' + MainForm.CGest.Items[I] + '`.`FUR` UNION ALL ';
+  QTemp.SQL.Text := Copy(SQLText, 1, Length(SQLText) - 11) + ') AS TEMP ORDER BY DENFUR';
+  QTemp.Active := True;
+  Clienti.Clear;
+  QTemp.Next;
+  while not QTemp.Eof do begin
+    Clienti.Add(QTemp.FieldByName('DENFUR').AsString + '|' + QTemp.FieldByName('CODFUR').AsString);
+    QTemp.Next;
+  end;
+end;
+
+procedure TEMail.DBContactKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  QAux: TQuery;
+  Aux: string;
+begin
+  if (Key = VK_F4) and not (ssAlt in Shift) then begin
+    if State = 0 then begin
+      QAux := TQuery.Create(EMail);
+      QAux.DatabaseName := MainForm.DB.DatabaseName;
+      QAux.SQL.Text := 'INSERT INTO `DBCABCONTA`.`FUR` (CODFC, DENFC, ADR, EMAIL, TEL, FAX) VALUES ("' +
+                        EDenFC.Hint + '", "' +
+                        EDenFC.Text + '", "' +
+                        EAdr.Text + '", "' +
+                        EEMail.Text + '", "' +
+                        ETel.Text + '", "' +
+                        EFax.Text + '")';
+      QAux.ExecSQL;
+      {QAux.SQL.Text := 'SELECT CODFC FROM `DBCABCONTA`.`FUR` WHERE (DENFC = "' +
+                       EDenFC.Text + '") AND (ADR = "' +
+                       EAdr.Text + '") AND (EMAIL = "' +
+                       EEMail.Text + '") AND (TEL = "' +
+                       ETel.Text + '") AND (FAX = "' +
+                       EFax.Text + '")';
+      QAux.Open;    }
+      //sCodFC := QAux.Fields[0].AsString;
+      sCodFC := EDenFC.Hint;
+      {QAux.SQL.Text := 'INSERT INTO `DBCABCONTA`.`ECHIV` VALUES ("' + EDenFC.Hint + '", ' + sCodFC + ')';
+      QAux.ExecSQL;  }
+      State := 1;
+    end;
+    Contact.Start(sCodFC, EDenFC.Text, '', sStare, iModule);
+    CQuery.SQL.Text := 'SELECT * FROM `DBCABCONTA`.`CONTACT` WHERE CODFC="' + sCodFC + '"';
+    CQuery.Active := True;
+
+  end;
+  if Key = VK_F7 then begin
+    with ECauta do begin
+      Visible := True;
+      Tag := 112;
+      Text := '';
+      SetFocus;
+      SelStart := 2;
+    end;
+  end;
+  if Key = VK_DELETE then
+    if MessageDlg('Esti sigur ca vrei asta?', mtWarning, mbYesNo, 0) = mrYes then begin
+      QMail.SQL.Text := 'DELETE FROM `DBCABCONTA`.`CONTACT` WHERE ID = ' + CQuery.FieldByName('ID').AsString;
+      QMail.ExecSQL;
+      CQuery.SQL.Text :=
+      'SELECT ID, CODFC, DENFC, ADR, TEL, FAX, EMAIL, CONCAT(IF(CODCONTRACTE&2=2,"C",""), IF(CODCONTRACTE&4=4,"G",""), IF(CODCONTRACTE&8=8,"S",""), ' +
+        'IF(CODCONTRACTE&16=16,"M",""), IF(CODCONTRACTE&32=32,"F",""), IF(CODCONTRACTE&64=64,"Gw",""), ' +
+        'IF(CODCONTRACTE&128=128,"Rc",""), IF(CODCONTRACTE&256=256,"Ex",""), IF(CODCONTRACTE&512=512,"Gr","")) AS CODCONTRACTE ' +
+      'FROM `DBCABCONTA`.`CONTACT` WHERE CODFC="' + sCodFC + '"';
+      CQuery.Active := True;
+    end;
+end;
+
+procedure TEMail.ECauta2Exit(Sender: TObject);
+begin
+  ECauta2.Visible := False;
+  ECauta2.Tag := 0;
+end;
+
+procedure TEMail.ECauta2KeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then begin TempDB.SetFocus; Exit; end
+  else
+    TempQuery.Locate('DENFUR', ECauta2.Text + Key, [loCaseInsensitive, loPartialKey])
+end;
+
+procedure TEMail.ECautaExit(Sender: TObject);
+begin
+  ECauta.Visible := False;
+  ECauta.Tag := 0;
+end;
+
+procedure TEMail.ECautaKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then begin DBContact.SetFocus; Exit; end
+  else
+    CQuery.Locate('DENFC', ECauta.Text + Key, [loCaseInsensitive, loPartialKey])
+end;
+
+procedure TEMail.EDenFCExit(Sender: TObject);
+var
+  I: integer;
+  SQL: string;
+begin
+  (Sender as TLabeledEdit).Color := clWindow;
+  if State = 0 then 
+    if Clienti.IndexOf(EDenFC.Text + '|' + EDenFC.Hint) > - 1 then begin
+      if TempQuery = nil then TempQuery := TQuery.Create(Self);
+      TempQuery.DatabaseName := MainForm.DB.DatabaseName;
+      SQL := 'SELECT DISTINCT * FROM (';
+      for I := 0 to MainForm.CGest.Items.Count - 1 do
+         SQL := SQL + 'SELECT DENFUR, CODFUR, FTIP, SECTIA, CONCAT(CONT_DM, CONT_USD) AS CONTRACT, ADRF, TELEFON, EMAIL FROM `' + MainForm.CGest.Items[I] + '`.`FUR` WHERE DENFUR = "' + EDenFC.Text + '" UNION ALL ';
+      TempQuery.SQL.Text := Copy(SQL, 1, Length(SQL) - 11) + ') AS TEMP GROUP BY CONTRACT, CODFUR, DENFUR ORDER BY DENFUR, CONTRACT';
+      TempQuery.Active := True;
+      if TempQuery.RecordCount = 1 then
+        with TempQuery do begin
+          EAdr.Text := FieldByName('ADRF').AsString;
+          EEMail.Text := LowerCase(FieldByName('EMAIL').AsString);
+          ETel.Text := FieldByName('TELEFON').AsString;
+          EFax.SetFocus;
+        end
+      else begin
+        TempDS := TDataSource.Create(EMail);
+        TempDS.DataSet := TempQuery;
+        TempDB.DataSource := TempDS;
+        TempDB.Visible := True;
+        TempDB.Height := 85;
+        TempDB.SetFocus;
+      end;
+    end;
+end;
+
+procedure TEMail.EDenFCKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  tsAux: TStringList;
+  I: Integer;
+  Temp: string;
+begin
+  if (Key in [VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN, VK_HOME, VK_END, VK_INSERT, VK_BACK, VK_DELETE, VK_PRIOR, VK_NEXT]) then Exit;
+  Temp := EDenFC.Text;
+  tsAux := TStringList.Create;
+  tsAux := Clienti;
+  for I := 0 to tsAux.Count - 1 do
+    if Copy(tsAux[I], 1, Length(EDenFC.Text)) = EDenFC.Text then begin
+      EDenFC.Text := Copy(tsAux[I], 1, Pos('|', tsAux[I]) - 1);
+      EDenFC.SelStart := Length(Temp);
+      EDenFC.SelLength := Length(EDenFC.Text) - Length(Temp);
+      EDenFC.Hint := Copy(tsAux[I], Pos('|', tsAux[I]) + 1);
+      Exit;
+    end;
+  tsAux.Free;
+end;
+
+procedure TEMail.EditKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then SelectNext(TEdit(Sender), True, True)
+  else
+    Key := UpCase(Key)
+end;
+
+procedure TEMail.EEMailKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then SelectNext(TEdit(Sender), True, True)
+  else
+    Key := LowerCase(Key)[1];
+end;
+
+procedure TEMail.EditExit(Sender: TObject);
+begin
+  (Sender as TLabeledEdit).Color := clWindow;
+  if (Sender as TLabeledEdit).Name = 'EEMail' then begin
+    if (Sender as TLabeledEdit).Text <> '' then
+      if (Pos('@', (Sender as TLabeledEdit).Text) <= 0) or (Pos('.', (Sender as TLabeledEdit).Text) <= 0) then begin
+        FDialog.Start('Atentie', 'Adresa e-mail necorespunzatoare!' + #13 + 'Daca nu doriti sa adaugati e-mail la acest contact lasati campul gol', fdOk, mtWarning);
+        EEMail.SetFocus;
+      end;
+  end;
+end;
+
+procedure TEMail.EditEnter(Sender: TObject);
+begin
+  (Sender as TLabeledEdit).Color := clSkyBlue;
+end;
+
+procedure TEMail.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #27 then Close;
+end;
+
+function TEMail.GetModuleName(No: integer): string;
+  var
+    Temp: string;
+    I: integer;
+  begin
+    Temp := 'C G S M F Gw Rc Ex Gr';
+    for I := 2 to No do
+      Delete(Temp, 1, Pos(' ', Temp));
+    Result := Copy(Temp, 1, Pos(' ', Temp) - 1);
+  end;
+
+procedure TEMail.MODULEKeyPress(Sender: TObject; var Key: Char);
+begin
+  Key := #0;
+end;
+
+procedure TEMail.FormShow(Sender: TObject);
+var
+  I: Integer;
+begin
+  CQuery := TQuery.Create(EMail);
+  CQuery.DatabaseName := MainForm.DB.DatabaseName;
+  FirmePopulate;
+  State := 0;
+  if sCodFC <> '#' then begin
+    Title.Caption := 'Modificare client';
+    EDenFC.Hint := sCodFC;
+    State := 1;
+    Btn_Echiv.Visible := True;
+    if sCodFC[1] = 'I' then begin
+      Btn_Echiv.Caption := 'Echivaleaza';
+      Btn_Echiv.Tag := 0;
+    end
+    else begin
+      Btn_Echiv.Caption := 'Detalii client';
+      Btn_Echiv.Tag := 1;
+    end;
+  end;
+  ECauta.Width := DBContact.Width;
+  EMail.Color :=  MainForm.Color;
+  if State = 1 then begin
+    QMail.SQL.Text := 'SELECT F.CODFC, F.DENFC, F.ADR, F.EMAIL, F.TEL, F. FAX ' +
+                      'FROM `DBCABCONTA`.`FUR` F ' +
+                      'WHERE F.CODFC = "' + sCodFC + '"';
+    QMail.Active := True;
+    with QMail do begin
+      EDenFC.Text := FieldByName('DENFC').AsString;
+      EAdr.Text := FieldByName('ADR').AsString;
+      EEMail.Text := FieldByName('EMAIL').AsString;
+      ETel.Text := FieldByName('TEL').AsString;
+      EFax.Text := FieldByName('FAX').AsString;
+    end;
+    //Blocat := QMail.FieldByName('SECTIA').AsString;
+    if sStare = 'B' then begin
+      STARE.Brush.Color := clRed;
+      STARE.Hint := 'Client blocat';
+    end;
+    //iModule := QMail.FieldByName('CODCONTRACTE').AsInteger;
+    for I := 1 to 10 do
+      if iModule and (1 shl I) = (1 shl I) then
+        MODULE.Text := MODULE.Text + GetModuleName(I);
+    CQuery.SQL.Text :=
+      'SELECT ID, CODFC, DENFC, ADR, TEL, FAX, EMAIL, CONCAT(IF(CODCONTRACTE&2=2,"C",""), IF(CODCONTRACTE&4=4,"G",""), IF(CODCONTRACTE&8=8,"S",""), ' +
+        'IF(CODCONTRACTE&16=16,"M",""), IF(CODCONTRACTE&32=32,"F",""), IF(CODCONTRACTE&64=64,"Gw",""), ' +
+        'IF(CODCONTRACTE&128=128,"Rc",""), IF(CODCONTRACTE&256=256,"Ex",""), IF(CODCONTRACTE&512=512,"Gr","")) AS CODCONTRACTE ' +
+      'FROM `DBCABCONTA`.`CONTACT` WHERE CODFC="' + sCodFC + '"';
+    CQuery.Active := True;
+    DSMail.DataSet := CQuery;
+  end else begin
+    //
+  end;
+end;
+
+function TEMail.Start(CodFur, Stare: string; Module: integer): integer;
+begin
+  EMail := TEMail.Create(Application);
+  Clienti := TStringList.Create;
+  sCodFC := Codfur;
+  sStare := Stare;
+  iModule := Module;
+  EMail.ShowModal;
+  EMail.Free;
+end;
+
+procedure TEMail.TempDBDblClick(Sender: TObject);
+var
+  TempCODFUR: string;
+begin
+  if TempDB.Height <> 242 then
+    with TempQuery do begin
+      EAdr.Text := FieldByName('ADRF').AsString;
+      EEMail.Text := LowerCase(FieldByName('EMAIL').AsString);
+      ETel.Text := FieldByName('TELEFON').AsString;
+      EDenFC.Hint := FieldByName('CODFUR').AsString;
+      EFax.SetFocus;
+    end
+  else begin
+    TempCODFUR := TempQuery.FieldByName('CODFUR').AsString;
+    TempQuery.SQL.Text := 'UPDATE `DBCABCONTA`.`FUR` SET CODFC="' + TempCODFUR + '" WHERE CODFC="' + EDenFC.Hint + '"';
+    TempQuery.ExecSQL;
+    TempQuery.SQL.Text := 'UPDATE `DBCABCONTA`.`CONTACT` SET CODFC="' + TempCODFUR + '" WHERE CODFC="' + EDenFC.Hint + '"';
+    TempQuery.ExecSQL;
+    EDenFC.Hint := TempCODFUR;
+  end;  
+  TempQuery.Free;
+  TempDS.Free;
+  TempDB.Visible := False;
+end;
+
+procedure TEMail.TempDBKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then TempDBDblClick(Self);
+  if not (Key in [' ', #13]) then begin
+    with ECauta2 do begin
+      Visible := True;
+      Tag := 112;
+      Text := Key;
+      TempQuery.Locate('DENFUR', ECauta.Text, [loCaseInsensitive, loPartialKey]);
+      SetFocus;
+      SelStart := 2;
+    end;
+  end;
+  if Key = #27 then begin
+    TempDB.Visible := False;
+    EDenFC.SetFocus;
+  end;
+end;
+
+end.

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2010/03/15 08:26:09.890.pas,C:\Documents and Settings\Administrator\My Documents\RAD Studio\Projects\Unit1.pas=C:\Documents and Settings\Administrator\Desktop\Copy of Blocare\Unit1.pas</Transaction>
+    <Transaction>2010/03/15 08:26:09.906.dfm,C:\Documents and Settings\Administrator\My Documents\RAD Studio\Projects\Unit1.dfm=C:\Documents and Settings\Administrator\Desktop\Copy of Blocare\Unit1.dfm</Transaction>
+    <Transaction>2010/03/15 08:26:14.171.dproj,C:\Documents and Settings\Administrator\My Documents\RAD Studio\Projects\Project1.dproj=C:\Documents and Settings\Administrator\Desktop\Copy of Blocare\Blocare.dproj</Transaction>
+    <Transaction>2010/03/15 08:26:52.046.pas,C:\Documents and Settings\Administrator\Desktop\Copy of Blocare\Unit1.pas=</Transaction>
+    <Transaction>2010/03/15 08:26:52.046.dfm,C:\Documents and Settings\Administrator\Desktop\Copy of Blocare\Unit1.dfm=</Transaction>
+    <Transaction>2010.03.27 04:50:12.212.pas,C:\Users\Ballistic\Desktop\Blocare\Unit2.pas=C:\Users\Ballistic\Desktop\Blocare\Jur_Clienti.pas</Transaction>
+    <Transaction>2010.03.27 04:50:12.212.dfm,C:\Users\Ballistic\Desktop\Blocare\Unit2.dfm=C:\Users\Ballistic\Desktop\Blocare\Jur_Clienti.dfm</Transaction>
+    <Transaction>2010.03.27 07:11:46.302.pas,C:\Users\Ballistic\Desktop\Blocare\Unit2.pas=C:\Users\Ballistic\Desktop\Blocare\Jur_C_Clienti.pas</Transaction>
+    <Transaction>2010.03.27 07:11:46.302.dfm,C:\Users\Ballistic\Desktop\Blocare\Unit2.dfm=C:\Users\Ballistic\Desktop\Blocare\Jur_C_Clienti.dfm</Transaction>
+    <Transaction>2010/11/02 11:41:02.875.pas,D:\Work\Blocare\Unit2.pas=D:\Work\Blocare\Sent_Mail.pas</Transaction>
+    <Transaction>2010/11/02 11:41:02.895.dfm,D:\Work\Blocare\Unit2.dfm=D:\Work\Blocare\Sent_Mail.dfm</Transaction>
+    <Transaction>2010.11.09 22:44:32.501.pas,D:\Blocare\Required\uSMTPMailer.pas=</Transaction>
+  </Transactions>
+</BorlandProject>

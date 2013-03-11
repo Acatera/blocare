@@ -1,0 +1,84 @@
+object FurPanel: TFurPanel
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
+  Caption = 'Detalii'
+  ClientHeight = 433
+  ClientWidth = 273
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object sScrollBox1: TsScrollBox
+    Left = 0
+    Top = 0
+    Width = 273
+    Height = 433
+    Align = alClient
+    TabOrder = 0
+    SkinData.SkinSection = 'PANEL_LOW'
+    object sPanel1: TsPanel
+      Left = 0
+      Top = 57
+      Width = 269
+      Height = 174
+      Align = alTop
+      TabOrder = 0
+      SkinData.SkinSection = 'PANEL'
+      ExplicitTop = 75
+      DesignSize = (
+        269
+        174)
+      object g: TStringGrid
+        Left = 4
+        Top = 4
+        Width = 261
+        Height = 165
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        ColCount = 1
+        DefaultColWidth = 240
+        DefaultRowHeight = 64
+        DefaultDrawing = False
+        FixedCols = 0
+        RowCount = 1
+        FixedRows = 0
+        TabOrder = 0
+        OnDrawCell = gDrawCell
+      end
+    end
+    object sCoolBar1: TsCoolBar
+      Left = 0
+      Top = 0
+      Width = 269
+      Height = 57
+      Bands = <>
+      SkinData.SkinSection = 'TOOLBAR'
+      object LDenFur: mslabelFX
+        Left = 5
+        Top = 13
+        Width = 172
+        Height = 42
+        Caption = 'Adrese email'
+        ParentFont = False
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -29
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = [fsBold]
+      end
+    end
+  end
+  object q: TQuery
+    DatabaseName = 'dsTest'
+    ParamCheck = False
+    Left = 16
+    Top = 88
+  end
+end

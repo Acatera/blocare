@@ -1,0 +1,130 @@
+unit FRezolvare;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, ComCtrls, DBTables, AlexUtils;
+
+type
+  TRezolvare = class(TForm)
+    CAngajat: TComboBox;
+    DRezolvare: TMemo;
+    LAngajat: TLabel;
+    LDetalii: TLabel;
+    Btn_Renunta: TButton;
+    Btn_Salveaza: TButton;
+    procedure FormShow(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure Btn_RenuntaClick(Sender: TObject);
+    procedure Btn_SalveazaClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    function Start(ID, Sesizare: string): integer;
+  end;
+
+var
+  Rezolvare: TRezolvare;
+  sID: string;
+  SesizID: string;
+  State: string;
+
+implementation
+
+uses FMain;
+
+{$R *.dfm}
+
+procedure TRezolvare.Btn_RenuntaClick(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TRezolvare.Btn_SalveazaClick(Sender: TObject);
+var
+  Query: TQuery;
+  Temp: string;
+begin
+  Temp := 'DA';
+//  if CDefinitiv.Checked = False then Temp := 'NU';
+  if State = 'M' then begin
+    Query := TQuery.Create(Rezolvare);
+    Query.DatabaseName := MainForm.DB.DatabaseName;
+    Query.SQL.Text :=
+      'UPDATE FDSOFT.AGENDA_MNG SET ' +
+        'BIFAT_DE = "' + CAngajat.Text + '", ' +
+        'TEXT_REZOLVAT = "' + StringReplace(StringReplace(TStringsToString(DRezolvare.Lines, '<char13><char10>'), '"', '<ghilimele>', [rfReplaceAll]), '*', '<steluta>', [rfReplaceAll]) + '"' +
+      'WHERE ROW_ID = ' + sID; 
+    Query.ExecSQL;
+  end;
+  if State = 'A' then begin
+    Query := TQuery.Create(Rezolvare);
+    Query.DatabaseName := MainForm.DB.DatabaseName;
+    Query.SQL.Text :=
+      'UPDATE FDSOFT.AGENDA_MNG SET ' +
+        'BIFAT_DE = "' + CAngajat.Text + '", ' +
+        'TEXT_REZOLVAT = "' + StringReplace(StringReplace(TStringsToString(DRezolvare.Lines, '<char13><char10>'), '"', '<ghilimele>', [rfReplaceAll]), '*', '<steluta>', [rfReplaceAll]) + '"' +
+      'WHERE ROW_ID = ' + sID;
+    Query.ExecSQL;
+  end;
+{  if CDefinitiv.Checked then begin
+    Query.SQL.Text :=
+      'UPDATE FCOMUN.PROBLEME SET REZOLVAT = "DA" WHERE ROW_ID = ' + SesizID;
+    Query.ExecSQL;
+  end;}
+  Query.Free;
+  if Temp = 'DA' then
+    State := '1'
+  else
+    State := '0';
+  Close;
+end;
+
+procedure TRezolvare.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #27 then Close;
+end;
+
+procedure TRezolvare.FormShow(Sender: TObject);
+var
+  Query: TQuery;
+begin
+  Color := MainForm.Color;
+  CAngajat.Items.CommaText := ListaAngajati;
+  CAngajat.Items.Add('TOTI');
+  State := 'A';
+  if sID <> '#' then State := 'M';
+  if State = 'M' then begin
+    Caption := 'Modificare rezolvare';
+    Query := TQuery.Create(Rezolvare);
+    Query.DatabaseName := MainForm.DB.DatabaseName;
+    Query.SQL.Text :=
+      'SELECT TEXT_REZOLVAT, UPPER(BIFAT_DE) AS BIFAT_DE, BIFAT_OK, ROW_ID FROM FDSOFT.AGENDA_MNG WHERE ROW_ID = ' + sID;
+    Query.Open;
+//    DData.Date := Query.FieldByName('DATA').AsDateTime;
+    CAngajat.ItemIndex := CAngajat.Items.IndexOf(Query.FieldByName('BIFAT_DE').AsString);
+    DRezolvare.Lines.Text := StringReplace(StringReplace(StringReplace(Query.FieldByName('TEXT_REZOLVAT').AsString, '||C10||', #13#10, [rfReplaceAll]), '<ghilimele>', '"', [rfReplaceAll]), '<steluta>', '*', [rfReplaceAll]);
+  end;
+  if State = 'A' then begin
+//    DData.Date := Now;
+    CAngajat.ItemIndex := CAngajat.Items.IndexOf(UpperCase(Copy(UMail, 1, Pos('@', UMail) - 1)));
+    Btn_Salveaza.Caption := 'Adauga';
+  end;
+  Query.Free;
+end;
+
+function TRezolvare.Start(ID, Sesizare: string): integer;
+begin
+  Rezolvare := TRezolvare.Create(Application);
+  sID := ID;
+  SesizID := Sesizare;
+  Rezolvare.ShowModal;
+  if State = '1' then
+    Result := 1
+  else Result := 0;
+  Rezolvare.Free;
+end;
+
+end.

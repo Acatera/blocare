@@ -1,0 +1,119 @@
+object Rezolvare: TRezolvare
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
+  Caption = 'Adaugare rezolvare'
+  ClientHeight = 155
+  ClientWidth = 455
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnKeyPress = FormKeyPress
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 16
+  object LData: TLabel
+    Left = 2
+    Top = 2
+    Width = 87
+    Height = 16
+    Caption = 'Data rezolvarii:'
+  end
+  object LAngajat: TLabel
+    Left = 2
+    Top = 53
+    Width = 49
+    Height = 16
+    Caption = 'Angajat:'
+  end
+  object LDetalii: TLabel
+    Left = 135
+    Top = 2
+    Width = 40
+    Height = 16
+    Caption = 'Detalii:'
+  end
+  object DData: TDateTimePicker
+    Left = 2
+    Top = 24
+    Width = 127
+    Height = 24
+    Date = 40249.017059236110000000
+    Time = 40249.017059236110000000
+    TabOrder = 4
+    TabStop = False
+  end
+  object CAngajat: TComboBox
+    Left = 2
+    Top = 75
+    Width = 127
+    Height = 24
+    Style = csDropDownList
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ItemHeight = 0
+    ParentFont = False
+    TabOrder = 5
+  end
+  object CDefinitiv: TCheckBox
+    Left = 8
+    Top = 105
+    Width = 97
+    Height = 17
+    Caption = 'Definitiv'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 1
+  end
+  object DRezolvare: TMemo
+    Left = 135
+    Top = 24
+    Width = 317
+    Height = 98
+    TabOrder = 0
+  end
+  object Btn_Renunta: TButton
+    Left = 240
+    Top = 128
+    Width = 80
+    Height = 25
+    Caption = 'Renunta'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 3
+    OnClick = Btn_RenuntaClick
+  end
+  object Btn_Salveaza: TButton
+    Left = 138
+    Top = 128
+    Width = 80
+    Height = 25
+    Caption = 'Salveaza'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 2
+    OnClick = Btn_SalveazaClick
+  end
+end

@@ -1,0 +1,517 @@
+object FisaClient: TFisaClient
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
+  Caption = 'FisaClient'
+  ClientHeight = 365
+  ClientWidth = 604
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnKeyPress = FormKeyPress
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Label3: TLabel
+    Left = 1
+    Top = 9
+    Width = 603
+    Height = 19
+    Alignment = taCenter
+    AutoSize = False
+    Caption = 'Selectati perioada'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clScrollBar
+    Font.Height = -16
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+    Visible = False
+  end
+  object Label1: TLabel
+    Left = 0
+    Top = 33
+    Width = 603
+    Height = 16
+    Alignment = taCenter
+    AutoSize = False
+    Caption = '-'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+  end
+  object Label2: TLabel
+    Left = 0
+    Top = 8
+    Width = 603
+    Height = 19
+    Alignment = taCenter
+    AutoSize = False
+    Caption = 'Selectati perioada'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object LActiuni: TLabel
+    Left = 8
+    Top = 339
+    Width = 43
+    Height = 16
+    Caption = 'Actiuni:'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+  end
+  object Z1: TEdit
+    Left = 181
+    Top = 30
+    Width = 33
+    Height = 24
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 0
+    Text = '1'
+    OnEnter = EditEnter
+    OnExit = EditExit
+    OnKeyPress = EditKeyPress
+  end
+  object L1: TEdit
+    Left = 213
+    Top = 30
+    Width = 33
+    Height = 24
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 1
+    Text = '01'
+    OnEnter = EditEnter
+    OnExit = EditExit
+    OnKeyPress = EditKeyPress
+  end
+  object A1: TEdit
+    Left = 245
+    Top = 30
+    Width = 41
+    Height = 24
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 2
+    Text = '2010'
+    OnEnter = EditEnter
+    OnExit = EditExit
+    OnKeyPress = EditKeyPress
+  end
+  object A2: TEdit
+    Left = 381
+    Top = 30
+    Width = 41
+    Height = 24
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 5
+    Text = '2010'
+    OnEnter = EditEnter
+    OnExit = EditExit
+    OnKeyPress = EditKeyPress
+  end
+  object L2: TEdit
+    Left = 349
+    Top = 30
+    Width = 33
+    Height = 24
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 4
+    Text = '2'
+    OnEnter = EditEnter
+    OnExit = EditExit
+    OnKeyPress = EditKeyPress
+  end
+  object Z2: TEdit
+    Left = 317
+    Top = 30
+    Width = 33
+    Height = 24
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 3
+    Text = '31'
+    OnEnter = EditEnter
+    OnExit = EditExit
+    OnKeyPress = EditKeyPress
+  end
+  object Btn_Afiseaza: TButton
+    Left = 224
+    Top = 60
+    Width = 75
+    Height = 25
+    Caption = 'Afiseaza'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 6
+    OnClick = Btn_AfiseazaClick
+  end
+  object Btn_Renunta: TButton
+    Left = 305
+    Top = 60
+    Width = 75
+    Height = 25
+    Caption = 'Renunta'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 7
+    OnClick = Btn_RenuntaClick
+  end
+  object DBFact: TDBGrid
+    Left = 0
+    Top = 91
+    Width = 603
+    Height = 238
+    TabStop = False
+    Ctl3D = True
+    DataSource = DS
+    FixedColor = 16744576
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    Options = [dgTitles, dgColumnResize, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit]
+    ParentCtl3D = False
+    ParentFont = False
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 8
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+    TitleFont.Style = [fsBold]
+    OnDrawColumnCell = DBFactDrawColumnCell
+    Columns = <
+      item
+        Expanded = False
+        FieldName = 'EXPLIC'
+        Title.Alignment = taCenter
+        Title.Caption = 'Explicatii'
+        Title.Font.Charset = DEFAULT_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -13
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Width = 270
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'CONT_COR'
+        Title.Alignment = taCenter
+        Title.Caption = 'Cont'
+        Title.Font.Charset = DEFAULT_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -13
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Width = 50
+        Visible = True
+      end
+      item
+        Alignment = taRightJustify
+        Expanded = False
+        FieldName = 'DEBIT'
+        Title.Alignment = taCenter
+        Title.Caption = 'Debit'
+        Title.Font.Charset = DEFAULT_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -13
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Width = 86
+        Visible = True
+      end
+      item
+        Alignment = taRightJustify
+        Expanded = False
+        FieldName = 'CREDIT'
+        Title.Alignment = taCenter
+        Title.Caption = 'Credit'
+        Title.Font.Charset = DEFAULT_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -13
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Width = 86
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'SOLD'
+        Title.Alignment = taCenter
+        Title.Caption = 'Sold'
+        Title.Font.Charset = DEFAULT_CHARSET
+        Title.Font.Color = clWindowText
+        Title.Font.Height = -13
+        Title.Font.Name = 'Tahoma'
+        Title.Font.Style = [fsBold]
+        Width = 86
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'FACT'
+        Visible = False
+      end
+      item
+        Expanded = False
+        FieldName = 'CR'
+        Visible = False
+      end
+      item
+        Expanded = False
+        FieldName = 'DB'
+        Visible = False
+      end>
+  end
+  object CActions: TComboBox
+    Left = 66
+    Top = 335
+    Width = 145
+    Height = 24
+    Style = csDropDownList
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ItemHeight = 16
+    ItemIndex = 0
+    ParentFont = False
+    TabOrder = 9
+    Text = 'Listeaza'
+    OnKeyPress = CActionsKeyPress
+    Items.Strings = (
+      'Listeaza'
+      'Salveaza...'
+      'Trimite mail...')
+  end
+  object Btn_Executa: TButton
+    Left = 217
+    Top = 335
+    Width = 64
+    Height = 25
+    Caption = 'Executa'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 10
+    OnClick = Btn_ExecutaClick
+  end
+  object CGest: TComboBox
+    Left = 0
+    Top = 0
+    Width = 115
+    Height = 21
+    Style = csDropDownList
+    ItemHeight = 0
+    TabOrder = 11
+  end
+  object Query: TQuery
+    DatabaseName = 'dsTest'
+    ParamCheck = False
+    SQL.Strings = (
+      
+        'SELECT EXPLICN, CONT_COR, DEBIT, CREDIT, 0 AS SOLD, FACT, 0  AS ' +
+        'DB, 0 AS CR FROM (SELECT "SOLD precedent:" AS EXPLICN, " " AS CO' +
+        'NT_COR, " " AS DEBIT, " " AS CREDIT, 0 AS FACT, " " AS DATAD UNI' +
+        'ON ALL SELECT CONCAT(IF(LEFT(DEBIT, 3)="512","Ord. ", ""), NRDI,' +
+        '" / ",CONCAT(SUBSTRING(DATAI,1,2),".",SUBSTRING(DATAI,3,2),".",S' +
+        'UBSTRING(DATAI,5,4))," - ",SUBSTRING(EXPLICN,1,1),LOWER(SUBSTRIN' +
+        'G(EXPLICN,2))) AS EXPLIC, DEBIT AS CONT_COR, " " AS DEBIT, SUM(S' +
+        'UMA) AS CREDIT, CONCAT("-",SUM(SUMA)) AS FACT, DATAI AS DATAD FR' +
+        'OM `quality`.`CM0110` WHERE (FURCLI = "RO1806470") AND (CREDIT="' +
+        '4111") GROUP BY NRDI, FURCLI UNION ALL SELECT CONCAT("Fact. ", N' +
+        'UMAR," / ",CONCAT(SUBSTRING(DATA,1,2),".",SUBSTRING(DATA,3,2),".' +
+        '",SUBSTRING(DATA,5,4))," - ",SUBSTRING(DENUMIRE,1,1),LOWER(SUBST' +
+        'RING(DENUMIRE,2))) AS EXPLIC, CONT AS CONT_COR, ROUND(SUM(VALOAR' +
+        'E+VAL_TVA),2) AS DEBIT, " " AS CREDIT, ROUND(SUM(VALOARE+VAL_TVA' +
+        '),2) AS FACT, DATA AS DATAD FROM `quality`.`MIV0110` WHERE (CODF' +
+        'UR = "RO1806470") AND (CONT_COR="4111") AND (ANULAT <> "A") GROU' +
+        'P BY NUMAR, CODFUR UNION ALL SELECT CONCAT(IF(LEFT(DEBIT, 3)="51' +
+        '2","Ord. ", ""), NRDI," / ",CONCAT(SUBSTRING(DATAI,1,2),".",SUBS' +
+        'TRING(DATAI,3,2),".",SUBSTRING(DATAI,5,4))," - ",SUBSTRING(EXPLI' +
+        'CN,1,1),LOWER(SUBSTRING(EXPLICN,2))) AS EXPLIC, DEBIT AS CONT_CO' +
+        'R, " " AS DEBIT, SUM(SUMA) AS CREDIT, CONCAT("-",SUM(SUMA)) AS F' +
+        'ACT, DATAI AS DATAD FROM `quality`.`CM0210` WHERE (FURCLI = "RO1' +
+        '806470") AND (CREDIT="4111") GROUP BY NRDI, FURCLI UNION ALL SEL' +
+        'ECT CONCAT("Fact. ", NUMAR," / ",CONCAT(SUBSTRING(DATA,1,2),".",' +
+        'SUBSTRING(DATA,3,2),".",SUBSTRING(DATA,5,4))," - ",SUBSTRING(DEN' +
+        'UMIRE,1,1),LOWER(SUBSTRING(DENUMIRE,2))) AS EXPLIC, CONT AS CONT' +
+        '_COR, ROUND(SUM(VALOARE+VAL_TVA),2) AS DEBIT, " " AS CREDIT, ROU' +
+        'ND(SUM(VALOARE+VAL_TVA),2) AS FACT, DATA AS DATAD FROM `quality`' +
+        '.`MIV0210` WHERE (CODFUR = "RO1806470") AND (CONT_COR="4111") AN' +
+        'D (ANULAT <> "A") GROUP BY NUMAR, CODFUR ORDER BY CONCAT(SUBSTRI' +
+        'NG(DATAD,5,4),SUBSTRING(DATAD,3,2),SUBSTRING(DATAD,1,2))) AS TEM' +
+        'P')
+    Top = 64
+  end
+  object DS: TDataSource
+    DataSet = Query
+    Top = 96
+  end
+  object RP: TRvProject
+    Engine = RS
+    ProjectFile = 'FisaClient.rav'
+    Left = 496
+    Top = 16
+  end
+  object RS: TRvSystem
+    TitleSetup = 'Output Options'
+    TitleStatus = 'Report Status'
+    TitlePreview = 'Report Preview'
+    SystemSetups = [ssAllowCopies, ssAllowCollate, ssAllowDuplex, ssAllowDestPreview, ssAllowDestPrinter, ssAllowDestFile, ssAllowPrinterSetup, ssAllowPreviewSetup]
+    SystemFiler.StatusFormat = 'Generez pagina %p'
+    SystemPreview.FormState = wsMaximized
+    SystemPreview.ZoomFactor = 100.000000000000000000
+    SystemPrinter.ScaleX = 100.000000000000000000
+    SystemPrinter.ScaleY = 100.000000000000000000
+    SystemPrinter.StatusFormat = 'Printez pagina %p'
+    SystemPrinter.Title = 'Fisa client'
+    SystemPrinter.UnitsFactor = 1.000000000000000000
+    Left = 464
+    Top = 16
+  end
+  object RPDF: TRvRenderPDF
+    DisplayName = 'Portable Document Format (PDF)'
+    FileExtension = '*.pdf'
+    EmbedFonts = False
+    ImageQuality = 90
+    MetafileDPI = 300
+    FontEncoding = feWinAnsiEncoding
+    DocInfo.Creator = 'Rave Reports (http://www.nevrona.com/rave)'
+    DocInfo.Producer = 'Nevrona Designs'
+    BufferDocument = True
+    DisableHyperlinks = True
+    Left = 560
+    Top = 16
+  end
+  object RQuery: TRvQueryConnection
+    RuntimeVisibility = rtDeveloper
+    Query = Query
+    Left = 528
+    Top = 16
+  end
+  object RPV: TRvRenderPreview
+    ZoomFactor = 100.000000000000000000
+    ShadowDepth = 0
+    Left = 560
+    Top = 46
+  end
+  object SD: TSaveDialog
+    DefaultExt = '*.PDF'
+    Filter = 'Portable Document Format|*.pdf'
+    Options = [ofOverwritePrompt, ofEnableSizing]
+    Title = 'Salvare fisier...'
+    Left = 96
+    Top = 64
+  end
+  object RAux1: TRvQueryConnection
+    RuntimeVisibility = rtDeveloper
+    Query = QAux1
+    Left = 528
+    Top = 46
+  end
+  object RAux2: TRvQueryConnection
+    RuntimeVisibility = rtDeveloper
+    Query = QAux2
+    Left = 528
+    Top = 76
+  end
+  object QAux1: TQuery
+    DatabaseName = 'dsTest'
+    ParamCheck = False
+    SQL.Strings = (
+      
+        'SELECT "SOLD precedent:" AS EXPLICN, " " AS CONT_COR, " " AS DEB' +
+        'IT, " " AS CREDIT, 0 AS SOLD, 0 AS FACT, 0 AS DB, 0 AS CR, " " A' +
+        'S DATAD UNION ALL SELECT CONCAT("Fact. ", NRDFC," / ",CONCAT(SUB' +
+        'STRING(DATAFC,1,2),".",SUBSTRING(DATAFC,3,2),".",SUBSTRING(DATAF' +
+        'C,5,4))," - ",SUBSTRING(EXPLIC,1,1),LOWER(SUBSTRING(EXPLIC,2))) ' +
+        'AS EXPLIC, CONTCOR AS CONT_COR, IF(SUMADB-SUMACR > 0, ROUND(SUMA' +
+        'DB-SUMACR, 2), 0) AS DEBIT, IF(SUMADB-SUMACR < 0, ROUND(SUMADB-S' +
+        'UMACR, 2), 0) AS CREDIT, 0 AS SOLD, (SUMADB-SUMACR) AS FACT, 0  ' +
+        'AS DB, 0 AS CR, DATAFC AS DATAD FROM `quality`.`FRES1208` WHERE ' +
+        '(CODFC = "R1834799") AND (CONTFC="4111") UNION ALL SELECT "Sold ' +
+        'la sfarsitul lunii precedente:" AS EXPLICN, " " AS CONT_COR, " "' +
+        ' AS DEBIT, " " AS CREDIT, 0 AS SOLD, 0 AS FACT, 0  AS DB, 0 AS C' +
+        'R,  " " AS DATAD')
+    Left = 32
+    Top = 64
+  end
+  object QAux2: TQuery
+    DatabaseName = 'dsTest'
+    ParamCheck = False
+    SQL.Strings = (
+      
+        'SELECT CONCAT("Fact. ", NRDFC," / ",CONCAT(SUBSTRING(DATAFC,1,2)' +
+        ',".",SUBSTRING(DATAFC,3,2),".",SUBSTRING(DATAFC,5,4))," - ",SUBS' +
+        'TRING(EXPLIC,1,1),LOWER(SUBSTRING(EXPLIC,2))) AS EXPLIC, CONTCOR' +
+        ' AS CONT_COR, IF(SUMADB-SUMACR > 0, ROUND(SUMADB-SUMACR, 2), 0) ' +
+        'AS DEBIT, IF(SUMADB-SUMACR < 0, ROUND(SUMADB-SUMACR, 2), 0) AS C' +
+        'REDIT, 0 AS SOLD, (SUMADB-SUMACR) AS FACT, 0 AS DB, 0 AS CR, DAT' +
+        'AFC AS DATAD FROM `quality`.`FRES0310` WHERE (CODFC = "R1834799"' +
+        ') AND (CONTFC="4111") AND (SUMADB-SUMACR <> 0)')
+    Left = 64
+    Top = 64
+  end
+end

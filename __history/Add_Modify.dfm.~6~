@@ -1,0 +1,64 @@
+object AddModify: TAddModify
+  Left = 0
+  Top = 0
+  BorderIcons = []
+  BorderStyle = bsSingle
+  Caption = 'AddModify'
+  ClientHeight = 83
+  ClientWidth = 321
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnKeyPress = FormKeyPress
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 16
+  object GB: TGroupBox
+    Left = 0
+    Top = 0
+    Width = 321
+    Height = 83
+    Align = alClient
+    TabOrder = 0
+    object LMessage: TLabel
+      Left = 24
+      Top = 24
+      Width = 69
+      Height = 21
+      Caption = 'LMessage'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
+      Visible = False
+    end
+    object EditBox: TLabeledEdit
+      Left = 5
+      Top = 38
+      Width = 206
+      Height = 24
+      EditLabel.Width = 48
+      EditLabel.Height = 16
+      EditLabel.Caption = 'Adauga:'
+      TabOrder = 0
+      OnKeyPress = EditBoxKeyPress
+    end
+    object Btn_Ok: TButton
+      Left = 224
+      Top = 38
+      Width = 75
+      Height = 25
+      Caption = 'Confirma'
+      TabOrder = 1
+      OnClick = Btn_OkClick
+    end
+  end
+end

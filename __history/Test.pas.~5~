@@ -1,0 +1,49 @@
+unit Test;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, Buttons, PngSpeedButton, ToolWin, ComCtrls, acCoolBar, StdCtrls,
+  pngimage, ExtCtrls, sPanel;
+
+type
+  TFTest = class(TForm)
+    sCoolBar1: TsCoolBar;
+    btnAccount: TPngSpeedButton;
+    btnBalanta: TPngSpeedButton;
+    btnBlock: TPngSpeedButton;
+    btnExit: TPngSpeedButton;
+    btnExport: TPngSpeedButton;
+    btnJournals: TPngSpeedButton;
+    btnMail: TPngSpeedButton;
+    btnPrint: TPngSpeedButton;
+    btnSelect: TPngSpeedButton;
+    btnSendAccount: TPngSpeedButton;
+    btnSent: TPngSpeedButton;
+    btnUnBlock: TPngSpeedButton;
+    sPanel1: TsPanel;
+    IDown: TImage;
+    IDownOver: TImage;
+    IUp: TImage;
+    IUpOver: TImage;
+    LFact: TLabel;
+    LGest: TLabel;
+    LManager: TLabel;
+    LMSelected: TLabel;
+    LSelected: TLabel;
+    LTotal: TLabel;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FTest: TFTest;
+
+implementation
+
+{$R *.dfm}
+
+end.

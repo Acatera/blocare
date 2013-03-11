@@ -1,0 +1,971 @@
+unit Bank;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, Grids, DBGrids, DB, DBTables, StrUtils, CheckLst, ExtCtrls, sButton, sEdit, sPanel, sBevel,
+  smslabel, AlexUtils, pngimage;
+
+type
+  TPayment = record
+    DataPlatii: string[8];
+    Partener: string;
+    CodFiscal: string[15];
+    Cont: string;
+    Banca: string;
+    NrOP: integer;
+    Factura: string;
+    Comentarii: string;
+    Ref: integer;
+    Suma: double;
+    Moneda: string[3];
+    Ok: boolean;
+  end;
+  TFBank = class(TForm)
+    btnProcessDump: TsButton;
+    DS: TDataSource;
+    Q: TQuery;
+    mDump: TMemo;
+    QF: TQuery;
+    DSF: TDataSource;
+    QTemp: TQuery;
+    btnCancel: TsButton;
+    btnSave: TsButton;
+    sPanel1: TsPanel;
+    DBG: TDBGrid;
+    sPanel2: TsPanel;
+    btnDenFur: TsButton;
+    btnCodFiscal: TsButton;
+    btnNumar: TsButton;
+    btnSuma: TsButton;
+    ECauta: TsEdit;
+    sPanel5: TsPanel;
+    DBF: TDBGrid;
+    btnAuthPayment: TsButton;
+    ECont: TsEdit;
+    pAchitat: mslabelFX;
+    pRamas: mslabelFX;
+    pComment: mslabelFX;
+    iEchiv: TImage;
+    procedure btnProcessDumpClick(Sender: TObject);
+    function PreluareExtras(Data: TStringList): integer;
+    procedure DBGCellClick(Column: TColumn);
+    procedure DBGKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure ShowOPDetails;
+    procedure FormShow(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure DBFKeyPress(Sender: TObject; var Key: Char);
+    procedure DBFDrawColumnCell(Sender: TObject; const Rect: TRect;
+      DataCol: Integer; Column: TColumn; State: TGridDrawState);
+    procedure btnAuthPaymentClick(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure DBGDrawColumnCell(Sender: TObject; const Rect: TRect;
+      DataCol: Integer; Column: TColumn; State: TGridDrawState);
+    procedure btnCancelClick(Sender: TObject);
+    procedure btnSaveClick(Sender: TObject);
+    procedure btnDenFurClick(Sender: TObject);
+    procedure btnCodFiscalClick(Sender: TObject);
+    procedure btnNumarClick(Sender: TObject);
+    procedure btnSumaClick(Sender: TObject);
+    procedure ECautaChange(Sender: TObject);
+    procedure ECautaKeyPress(Sender: TObject; var Key: Char);
+    procedure DBFKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+  private
+    procedure ReleaseButtons(Sender: TObject);
+    function GetLocateCriteria: string;
+  public
+    function Start(Firma: string): integer;
+  end;
+
+var
+  FBank: TFBank;
+  NrFactRestante: string;
+  DataFactRestante: string;
+  Selection: TStringList;
+  BSelection: TStringList;
+  Ramas: double;
+  sFirma: string;
+  sCodFC: string;
+  sDenFC: string;
+  Browser: string;
+  FontColor: integer;
+  MedianColor: integer;
+  BkColor: integer;
+
+implementation
+
+uses FMain, Dialog;
+
+{$R *.dfm}
+
+function TFBank.Start(Firma: string): integer;
+begin
+  FBank := TFBank.Create(Application);
+  sFirma := Firma;
+  FBank.ShowModal;
+  FBank.Free;
+end;
+
+procedure TFBank.ShowOPDetails;
+var
+  I: Integer;
+  Achitat: double;
+  DB: double;
+  CR: double;
+begin
+  if Q.RecordCount = 0 then Exit;
+  DBF.Tag := 0;
+  //DBF.Columns[7].Visible := False;
+  Ramas := DBG.Fields[5].AsFloat;
+  pAchitat.Caption := FloatToStrF(Ramas, ffFixed, 14, 2);
+  if Q.FieldByName('FACTURA').AsString <> '0' then
+    Selection.CommaText := Q.FieldByName('FACTURA').AsString
+  else begin
+    Selection.Clear;
+    QTemp.SQL.Text := 'UPDATE `' + sFirma + '`.`TMPFRES` SET ACHITAT = 0 WHERE VALIDAT <> "DA"';
+    QTemp.ExecSQL;
+  end;
+  QF.SQL.Text := 'SET @REST := 0';
+  QF.ExecSQL;
+  QF.SQL.Text := 'SET @NRCRT := 0';
+  QF.ExecSQL;
+  QTemp.SQL.Text :=
+    'SELECT NRDFC, SUMADB, SUMACR ' +
+    'FROM `' + sFirma + '`.`TMPFRES` ' +
+    'WHERE CODFC = "' + Q.FieldByName('CODFUR').AsString + '"';
+  QTemp.Open;
+  for I := 0 to Selection.Count - 1 do begin
+    if QTemp.Locate('NRDFC',Selection[I],[loCaseInsensitive]) then begin
+      DB := QTemp.FieldByName('SUMADB').AsFloat;
+      CR := QTemp.FieldByName('SUMACR').AsFloat;
+      if Ramas < (DB - CR) then begin
+        if DB >= CR then begin
+          Achitat := Ramas;
+          Ramas := 0;
+        end else begin
+          Achitat := DB - CR;
+          Ramas := Ramas - Achitat;
+        end;
+      end else begin
+        if DB >= CR then begin
+          Achitat := DB - CR;
+          Ramas := Ramas - Achitat;
+        end else begin
+          Achitat := DB - CR;
+          Ramas := Ramas - Achitat;
+        end;
+      end;
+      if ((QTemp.RecordCount = 1) and (Ramas > 0)) or ((Selection.Count = QTemp.RecordCount) and (I = Selection.Count) and (Ramas > 0)) then begin
+        Achitat := Achitat + Ramas;
+        Ramas := 0;
+      end;
+      QF.SQL.Text := 'UPDATE `' + sFirma + '`.`TMPFRES` SET ACHITAT = ' + FloatToStrF(Achitat,ffFixed, 14, 2) + ' ' +
+        'WHERE NRDFC = ' + Selection[I] + '  AND CODFC = "' + Q.FieldByName('CODFUR').AsString + '"';
+      QF.ExecSQL;
+    end; //if locate
+  end;
+  QF.SQL.Text :=
+    'SELECT NRDFC, CONCAT(MID(DATAFC,1,2),".",MID(DATAFC,3,2),".",MID(DATAFC,5,4)) DATAFC, ' +
+      'ROUND(SUMADB,2) SUMADB, @SUMACR := ROUND(IF(VALIDAT="DA" OR ACHITAT <> 0,SUMACR + ACHITAT,SUMACR),2) SUMACR, ' +
+      'ROUND(SUMADB - @SUMACR, 2) RAMAS, @REST := @REST + (SUMADB - @SUMACR), VALIDAT, CODFC, ' +
+      'SUMACR SUMACR2, ACHITAT, @NRCRT := @NRCRT + 1 NRCRT, DENFUR, COD_FISCAL ' +
+    'FROM `' + sFirma + '`.`TMPFRES` LEFT JOIN `' + sFirma + '`.`FUR` ON CODFC = CODFUR ' +
+    'WHERE CODFC = ("' + Q.FieldByName('CODFUR').AsString + '") AND (CONTFC LIKE "4111%")  AND ' +
+      '(SUMADB-SUMACR <> 0) ORDER BY NRDFC';
+  QF.Open;
+  if QF.RecordCount = 0 then begin
+    //DBF.Columns[7].Visible := True;
+    DBF.Tag := 1;
+    QF.SQL.Text :=
+      'SELECT NRDFC, CONCAT(MID(DATAFC,1,2),".",MID(DATAFC,3,2),".",MID(DATAFC,5,4)) DATAFC, ' +
+        'ROUND(SUMADB,2) SUMADB, @SUMACR := ROUND(IF(VALIDAT="DA" OR ACHITAT <> 0,SUMACR + ACHITAT,SUMACR),2) SUMACR, ' +
+        'ROUND(SUMADB - @SUMACR, 2) RAMAS, @REST := @REST + (SUMADB - @SUMACR), VALIDAT, CODFC, ' +
+        'SUMACR SUMACR2, ACHITAT, @NRCRT := @NRCRT + 1 NRCRT, DENFUR, COD_FISCAL ' +
+      'FROM `' + sFirma + '`.`TMPFRES` LEFT JOIN `' + sFirma + '`.`FUR` ON CODFC = CODFUR ' +
+      'WHERE CONTFC LIKE "4111%"  AND (SUMADB-SUMACR <> 0) ' +
+      'ORDER BY DENFUR, NRDFC';
+    QF.Open;
+  end;
+//  pRamas.Caption := 'Ramas: ' + FloatToStrF(Ramas,ffFixed, 14, 2);
+  pRamas.Caption := FloatToStrF(Ramas,ffFixed, 14, 2);
+  Ramas := Round(Ramas*10000)/10000;
+  if Ramas = 0 then
+    pRamas.Font.Color := $00289F00
+  else
+    pRamas.Font.Color := clRed;
+  pComment.Caption := Q.FieldByName('COMENTARII').AsString;
+  if Q.FieldByName('VALIDAT').AsString = 'DA' then begin
+    btnAuthPayment.Caption := 'Fara achitare';
+    btnAuthPayment.Tag := 1;
+  end else begin
+    btnAuthPayment.Caption := 'Valideaza plata';
+    btnAuthPayment.Tag := 0;
+  end;
+  
+end;
+
+procedure TFBank.DBFDrawColumnCell(Sender: TObject; const Rect: TRect;
+  DataCol: Integer; Column: TColumn; State: TGridDrawState);
+var
+  S: string;
+  ARect: TRect;
+begin
+  ARect := Rect;
+  if Rect.Top = 0 then Exit;
+  {with (Sender as TDBGrid).Canvas.Brush do
+    if Odd(QF.FieldByName('NRCRT')) then Color := RandImpar//$00E28F7B
+    else Color := RandPar;//$00E2A596;    }
+  S := StringReplace(Column.Field.Text, '&', '&&', [rfReplaceAll]);
+
+  if DBF.Fields[7].AsString = 'DA' then
+    DBF.Canvas.Brush.Color := Colors.Contract;
+
+  if ((Sender as TDBGrid).Name = 'DBF') and (Selection.IndexOf(DBF.Fields[1].Text) >= 0) then begin
+    (Sender as TDBGrid).Canvas.Brush.Color := MedianColor;//$00C08000;
+    (Sender as TDBGrid).Canvas.Font.Color := FontColor;
+  end;
+
+  if (Column.Index > 2) then
+    if (Column.Field.AsFloat = 0) then
+        (Sender as TDBGrid).Canvas.Font.Color := MedianColor;
+
+  if (Column.Index = 5) then begin
+    if (Column.Field.AsFloat < 0)  then
+      (Sender as TDBGrid).Canvas.Font.Color := GetMedianColor(clRed, FontColor, 50)
+    else if (Column.Field.AsFloat > 0) then
+      (Sender as TDBGrid).Canvas.Font.Color := GetMedianColor(clGreen, FontColor, 50);
+  end;
+
+  if gdSelected in State then begin
+    (Sender as TDBGrid).Canvas.Brush.Color := FontColor;
+    (Sender as TDBGrid).Canvas.Font.Color := BkColor;
+  end;
+
+  (Sender as TDBGrid).Canvas.FillRect(Rect);
+  if Column.Index = 0 then
+    ARect.Left := Rect.Left + 2;
+  if Column.Index = 5 then
+    ARect.Right := Rect.Right - 2;
+  if Column.Index = 0 then begin
+    DrawText((Sender as TDBGrid).Canvas.Handle, PChar(S), Length(S), ARect, 0);
+    Exit;
+  end;
+  if Column.Index = 2 then begin
+    DrawText((Sender as TDBGrid).Canvas.Handle, PChar(S), Length(S), ARect, 1);
+    Exit
+  end;
+//  if Column.Index = 2 then
+  if (Column.Index > 2) then
+    S := FloatToStrF(StrToFloat(S), ffFixed, 15, 2);
+    DrawText((Sender as TDBGrid).Canvas.Handle, PChar(S), Length(S), ARect, 2)
+end;
+
+procedure TFBank.DBFKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if Key = VK_F7 then
+    ECauta.SetFocus;
+end;
+
+procedure TFBank.DBFKeyPress(Sender: TObject; var Key: Char);
+var
+  Achitat: double;
+  DB: double;
+  CR: double;
+  Temp: string;
+  SQL: string;
+begin
+  if Key = ' ' then begin
+    if Selection.IndexOf(QF.Fields[0].AsString) >= 0 then begin
+      Selection.Delete(Selection.IndexOf(QF.Fields[0].AsString));
+      Ramas := Ramas + QF.FieldByName('ACHITAT').AsFloat;
+      QTemp.SQL.Text := 'UPDATE `' + sFirma + '`.`TMPFRES` SET ACHITAT = 0 ' +
+        'WHERE NRDFC = ' + QF.Fields[0].AsString + '  AND CODFC = "' + QF.Fields[7].AsString + '"';
+    end else begin
+      Selection.Add(QF.Fields[0].AsString);
+      if {DBF.Columns[7].Visible} DBF.Tag = 1 then begin
+        sCodFC := QF.FieldByName('CODFC').AsString;
+        sDenFC := QF.FieldByName('DENFUR').AsString;
+      end else begin
+        sCodFC := '';
+        sDenFC := '';
+      end;
+      DB := QF.FieldByName('SUMADB').AsFloat;
+      CR := QF.FieldByName('SUMACR2').AsFloat;
+      if Ramas < (DB - CR) then begin
+        if DB >= CR then begin
+          Achitat := Ramas;
+          Ramas := 0;
+        end else begin
+          Achitat := DB - CR;
+          Ramas := Ramas - Achitat;
+        end;
+      end else begin
+        if DB >= CR then begin
+          Achitat := DB - CR;
+          Ramas := Ramas - Achitat;
+        end else begin
+          Achitat := DB - CR;
+          Ramas := Ramas - Achitat;
+        end;
+      end;
+      if (QF.FieldByName('NRCRT').AsInteger = QF.RecordCount) and (Ramas > 0) then begin
+        Achitat := Achitat + Ramas;
+        Ramas := 0;
+      end;
+      QTemp.SQL.Text :=
+        'UPDATE `' + sFirma + '`.`TMPFRES` SET ACHITAT = ' + FloatToStrF(Achitat, ffFixed, 14, 2) + ' ' +
+        'WHERE NRDFC = ' + QF.Fields[0].AsString + '  AND CODFC = "' + QF.Fields[7].AsString + '"';
+    end;
+    QTemp.ExecSQL;
+    pRamas.Caption := FloatToStrF(Ramas, ffFixed, 14, 2);
+//    pRamas.Caption := 'Ramas: ' + FloatToStrF(Ramas, ffFixed, 14, 2);
+    Ramas := Round(Ramas*10000)/10000;
+    if Ramas = 0 then
+      pRamas.Font.Color := $00289F00
+    else
+      pRamas.Font.Color := Colors.Overdue;
+    Temp := QF.FieldByName('NRDFC').AsString;
+    SQL := QF.SQL.Text;
+    QF.SQL.Text := 'SET @REST := 0';
+    QF.ExecSQL;
+    QF.SQL.Text := 'SET @NRCRT := 0';
+    QF.ExecSQL;
+    QF.SQL.Text := SQL;
+    QF.Open;
+    QF.Locate('NRDFC',Temp,[loCaseInsensitive]);
+    QF.Next;
+  end; //' '
+end;
+
+procedure TFBank.DBGCellClick(Column: TColumn);
+begin
+  if Q.FieldByName('INCASAT').AsString = 'DA' then begin
+    QF.Active := False;
+    Exit;
+  end;
+  if Q.FieldByName('VALIDAT').AsString = 'DA' then begin
+    btnAuthPayment.Caption := 'Fara achitare';
+    btnAuthPayment.Tag := 1;
+  end else begin
+    btnAuthPayment.Caption := 'Valideaza plata';
+    btnAuthPayment.Tag := 0;
+  end;
+  ShowOPDetails;
+end;
+
+procedure TFBank.DBGDrawColumnCell(Sender: TObject; const Rect: TRect;
+  DataCol: Integer; Column: TColumn; State: TGridDrawState);
+var
+  ARect: TRect;
+  S: string;
+begin
+  if Q.RecordCount <= 0 then Exit;
+  
+  ARect := Rect;
+  if Rect.Top = 0 then Exit;
+  //S := StringReplace(Column.Field.Text, ',', #13, [rfReplaceAll]);
+  S := Column.Field.AsString;
+
+  if DBG.Fields[9].AsString = 'DA' then
+    DBG.Canvas.Font.Color := MedianColor
+  else
+    DBG.Canvas.Font.Color := FontColor;
+
+//  if (Column.Index = 6) and (Column.Field.AsString = 'DA') then
+//    DBG.Canvas.Brush.Color := Colors.Contract;
+
+  if (Column.Index = 4) and (Column.Field.AsString = '0') then begin
+//    DBG.Canvas.Font.Style := [fsBold];
+    DBG.Canvas.Font.Color := MedianColor;
+  end;
+
+  if (Column.Index = 5) then
+    S := FloatToStrF(StrToFloat(S), ffFixed, 15, 2);
+
+  if gdSelected in State then begin
+    (Sender as TDBGrid).Canvas.Brush.Color := iif(DBG.Fields[9].AsString = 'DA', MedianColor, FontColor);
+    (Sender as TDBGrid).Canvas.Font.Color := BkColor;
+  end;
+  
+  (Sender as TDBGrid).Canvas.FillRect(Rect);
+  ARect.Left := Rect.Left + 2;
+  if (Column.Index >= 3) and (Column.Index <= 5) then
+    DrawText((Sender as TDBGrid).Canvas.Handle, PChar(S), Length(S), ARect, 2)
+  else if (Column.Index = 6) or (Column.Index = 9) then
+    DrawText((Sender as TDBGrid).Canvas.Handle, PChar(S), Length(S), ARect, 1)
+  else
+    DrawText((Sender as TDBGrid).Canvas.Handle, PChar(S), Length(S), ARect, 0);
+end;
+
+procedure TFBank.DBGKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if Q.FieldByName('INCASAT').AsString = 'DA' then begin
+    QF.Active := False;
+    Exit;
+  end;
+  if (Key = VK_DOWN) or (Key = VK_UP) then begin
+    if Q.FieldByName('VALIDAT').AsString = 'DA' then begin
+      btnAuthPayment.Caption := 'Fara achitare';
+      btnAuthPayment.Tag := 1;
+    end else begin
+      btnAuthPayment.Caption := 'Valideaza plata';
+      btnAuthPayment.Tag := 0;
+    end;
+    ShowOPDetails;
+  end;
+end;
+
+procedure TFBank.ECautaChange(Sender: TObject);
+begin
+  try
+    DBF.DataSource.DataSet.Locate(GetLocateCriteria, eCauta.Text, [loCaseInsensitive, loPartialKey]);
+  except end;
+end;
+
+procedure TFBank.ECautaKeyPress(Sender: TObject; var Key: Char);
+begin
+  Key := UpCase(Key);
+  if Key = #13 then 
+    DBF.SetFocus;
+end;
+
+function TFBank.GetLocateCriteria: string;
+begin
+  Result := '';
+  if btnDenFur.Down then Result := 'DENFUR';
+  if btnCodFiscal.Down then Result := 'COD_FISCAL';
+  if btnNumar.Down then Result := 'NRDFC';
+  if btnSuma.Down then Result := 'SUMADB';
+end;
+
+procedure TFBank.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Selection.Free;
+  BSelection.Free;
+end;
+
+procedure TFBank.FormCreate(Sender: TObject);
+begin
+  Selection := TStringList.Create;
+  BSelection := TStringList.Create;
+end;
+
+procedure TFBank.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #27 then Close;
+end;
+
+procedure TFBank.FormShow(Sender: TObject);
+var
+  Key: Word;
+  SQL: string;
+begin
+  Browser := MainForm.Options.Values['BROWSER'];
+  mDump.PasteFromClipboard;
+  Caption := 'Extrase bancare - ' + MainForm.cbFirme.Text;
+  //Color := MainForm.Color;
+  //DBF.FixedColor := MainForm.DBGest.FixedColor;
+  //DBG.FixedColor := MainForm.DBGest.FixedColor;
+
+  FontColor := MainForm.FontColor;
+  BkColor := MainForm.BkColor;
+  MedianColor := GetMedianColor(FontColor, BkColor, 30);
+
+  if (sFirma = 'fdsoft') or (sFirma = 'fsoftware') then ECont.Text := '512103' else
+  if (sFirma = 'fservices') or (sFirma = 'quality') then ECont.Text := '5121.3';
+
+  SQL := 'CREATE TABLE IF NOT EXISTS `' + sFirma + '`.`EXTRASE` (' +
+           '`DATA` char(8) NOT NULL default "", ' +
+           '`DENFUR` char(30) NOT NULL default "",' +
+           '`COD_FISCAL` char(15) NOT NULL default "", ' +
+           '`CODFUR` char(15) NOT NULL default "", ' +
+           '`ECHIV` char(2) NOT NULL default "NU", ' +
+           '`CONT` char(24) NOT NULL default "", ' +
+           '`BANCA` char(40) NOT NULL default "", ' +
+           '`NROP` bigint(10) NOT NULL default "0", ' +
+           '`COMENTARII` char(140) NOT NULL default "", ' +
+           '`FACTURA` char(40) NOT NULL default "", ' +
+           '`REF` bigint(20) NOT NULL default "0", ' +
+           '`SUMA` double(14,2) NOT NULL default 0.00, ' +
+           '`MONEDA` char(3) NOT NULL default "", ' +
+           '`FACT_USR` char(40) NOT NULL default "", ' +
+           '`VALIDAT` char(2) NOT NULL default "NU", ' +
+           '`INCASAT` char(2) NOT NULL default "NU", ' +
+           'UNIQUE KEY `COD_FISCAL` (`COD_FISCAL`,`NROP`,`REF`), ' +
+           'KEY `CODFUR` (`CODFUR`) ' +
+         ') ENGINE=MyISAM DEFAULT CHARSET=latin1';
+  DoSQL(q, SQL);
+  DoSQL(Q, 'DELETE FROM `' + sFirma + '`.`EXTRASE` WHERE INCASAT = "NU"');
+
+  SQL := 'CREATE TABLE IF NOT EXISTS `' + sFirma + '`.`ECHIV` (' +
+           '`CODFUR` char(15) NOT NULL default "", ' +
+           '`COD_FISCAL` char(15) NOT NULL default "", ' +
+           'KEY `NRDFC` (`CODFUR`),' +
+           'KEY `CODFC` (`COD_FISCAL`) ' +
+         ') ENGINE=InnoDB DEFAULT CHARSET=latin1';
+  DoSQL(q, SQL);
+
+  DoSQL(Q, 'DROP TABLE IF EXISTS `' + sFirma + '`.`TMPFRES`');
+  SQL := 'CREATE TABLE IF NOT EXISTS `' + sFirma + '`.`TMPFRES` (' +
+           '`NRDFC` bigint(10) NOT NULL default 0, ' +
+           '`DATAFC` char(8) NOT NULL default "", ' +
+           '`DATASC` char(8) NOT NULL default "", ' +
+           '`SUMADB` double(14,2) NOT NULL default 0.00, ' +
+           '`SUMACR` double(14,2) NOT NULL default 0.00, ' +
+           '`CONTFC` char(9) NOT NULL default "", ' +
+           '`CODFC` char(15) NOT NULL default "", ' +
+           '`GESTIUNE` char(8) NOT NULL default "", ' +
+           '`ACHITAT` double(14,2) NOT NULL default 0.00, '+
+           '`VALIDAT` char(2) NOT NULL default "", '+
+           'KEY `NRDFC` (`NRDFC`),' +
+           'KEY `CODFC` (`CODFC`) ' +
+         ') ENGINE=InnoDB DEFAULT CHARSET=latin1';
+  DoSQL(q, SQL);
+
+  SQL := 'INSERT INTO `' + sFirma + '`.`TMPFRES` ' +
+           'SELECT ' +
+             'NRDFC, DATAFC, DATASC, SUMADB, SUMACR, CONTFC, CODFC, GESTIUNE, 0 ACHITAT, "NU" VALIDAT ' +
+           'FROM `' + sFirma + '`.`FRES' + sDate + '` ' +
+           'WHERE CONTFC LIKE "4111%" AND (SUMADB-SUMACR <> 0) ' +
+           'ORDER BY NRDFC';
+  DoSQL(q, SQL);
+
+  SQL := 'SELECT ' +
+           'E.COD_FISCAL, E.DENFUR, DATA, NROP, FACTURA, SUMA, VALIDAT, E.CODFUR, COMENTARII, INCASAT, CONCAT(NROP,REF) ID_LOCATE ' +
+         'FROM `' + sFirma + '`.`EXTRASE` E ' +
+         'WHERE CONCAT(MID(DATA,3,2),MID(DATA,7,2)) = "' + sDate + '" ' +
+         'ORDER BY VALIDAT DESC, CONCAT(MID(DATA,5,4),MID(DATA,3,2),MID(DATA,1,2)) DESC';
+  DoSQL(q, SQL);
+
+  Key := VK_UP;
+  DBGKeyUp(Self, Key, []);
+end;
+
+function GetPayment(Row: widestring): TPayment;
+var
+  Rand: string;
+  t: string;
+  Eroare: boolean;
+  NrFact: string;
+  tsTemp: TStringList;
+  I: Integer;
+begin
+  Eroare := False;
+  Rand := Trim(Row);
+
+  {Data}
+  t := Copy(Rand, 1, Pos(#9, Rand) - 1);
+  if l(t) = 10 then begin
+    if VerifyDate(t) then
+      Result.DataPlatii := t[1]+t[2] + t[4]+t[5] + t[7]+t[8]+t[9]+t[10]
+    else  Eroare := True;
+  end else
+    Eroare := True; //data
+
+  {Nume Partener}
+  if not Eroare then begin
+    Rand := Copy(Rand, Pos(#9, Rand) + 1);
+    t := Copy(Rand, 1, Pos(', CUI/CNP:', Rand) - 1);
+    if t <> '' then
+      Result.Partener := t
+    else
+      Eroare := True;
+  end;
+
+  {CNP/CUI}
+  if not Eroare then begin
+    Rand := Copy(Rand, Pos(', CUI/CNP:', Rand) + 10);
+    t := Copy(Rand, 1, Pos(', CONT:', Rand) - 1);
+    if VerifyCNP(t) or VerifyCUI(t) then Result.CodFiscal := t;
+  end;
+
+  {Cont}
+  if not Eroare then begin
+    Rand := Copy(Rand, Pos(', CONT:', Rand) + 7);
+    t := Copy(Rand, 1, Pos(', LA:', Rand) - 1);
+    if t <> '' then
+      Result.Cont := t
+    else
+      Eroare := True;
+  end;
+
+  {Banca}
+  if not Eroare then begin
+    Rand := Copy(Rand, Pos(', LA:', Rand) + 5);
+    t := Copy(Rand, 1, Pos(', Nr op.:', Rand) - 1);
+    if t = '' then
+      t := Copy(Rand, 1, Pos(', ', Rand) - 1);
+    if t <> '' then
+      Result.Banca := t
+    else
+      Eroare := True;
+  end;
+
+  {Nr OP}
+  if not Eroare then begin
+    if Pos(', Nr op.:', Rand) > 0 then begin
+      Rand := Copy(Rand, Pos(', Nr op.:', Rand) + 9);
+      t := Copy(Rand, 1, Pos(', ', Rand) - 1);
+      Result.NrOP := GetDigits(t);
+    end else
+      Result.NrOP := 0;
+  end;
+
+  {Observatii}
+  if not Eroare then begin
+    Rand := Copy(Rand, Pos(', ', Rand) + 2);
+    t := Copy(Rand, 1, Pos(', Ref.:', Rand) - 1);
+    if t <> '' then begin
+      Result.Comentarii := t;
+      tsTemp := TStringList.Create;
+      tsTemp.CommaText := DataFactRestante;
+      for I := 0 to tsTemp.Count - 1 do begin
+        if (Pos(tsTemp[i],t) <> 0) then begin
+          t := StringReplace(t, tsTemp[I], '', [rfReplaceAll])
+        end;
+        if Pos(StringReplace(tsTemp[i],'.','/',[rfReplaceAll]),t) <> 0 then begin
+          t := StringReplace(t, StringReplace(tsTemp[i],'.','/',[rfReplaceAll]), '', [rfReplaceAll])
+        end;
+        if (Pos(Copy(tsTemp[i],1,6)+Copy(tsTemp[i],9,2),t) <> 0) then begin
+          t := StringReplace(t, Copy(tsTemp[I],1,6)+Copy(tsTemp[i],9,2), '', [rfReplaceAll])
+        end;
+        if (Pos(Copy(tsTemp[i],1,5),t) <> 0) then begin
+          t := StringReplace(t, Copy(tsTemp[I],1,5), '', [rfReplaceAll])
+        end;
+      end;
+      //am eliminat data
+      tsTemp.CommaText := NrFactRestante;
+      NrFact := '';
+      for I := 0 to tsTemp.Count - 1 do
+        if Pos(tsTemp[i],t) <> 0 then begin
+          NrFact := NrFact + tsTemp[i] + ',';
+          t := StringReplace(t, tsTemp[I], '', [rfReplaceAll])
+        end;
+      NrFact := Copy(NrFact,1,Length(NrFact)-1);
+      if NrFact = '' then NrFact := '0';
+
+      Result.Factura := NrFact;
+    end;
+  end;
+
+  {Referinta}
+  if not Eroare then begin
+    Rand := Copy(Rand, Pos(', Ref.:', Rand) + 7);
+    t := Copy(Rand, 1, Pos(#9, Rand) - 1);
+    try
+      if StrToInt(t) > 0 then begin
+        if Result.NrOP = 0 then
+          Result.NrOP := StrToInt(Copy(t, Length(t) - 2));
+        Result.Ref := StrToInt(t);
+      end;
+    except
+      Eroare := True;
+    end;
+  end;
+
+  {Suma}
+  if not Eroare then begin
+    Rand := Copy(Rand, Pos(#9, Rand) + 1);
+    t := Copy(Rand, 1, Pos(#9, Rand) - 1);
+    t := StringReplace(t,',','',[rfReplaceAll]);
+    t := StringReplace(t,'.','',[rfReplaceAll]);
+    try
+      if s2f(t) > 0 then
+        Result.Suma := s2f(t) / 100;
+    except
+      Eroare := True;
+    end;
+  end;
+
+  {Moneda}
+  if not Eroare then begin
+    Rand := Copy(Rand, Pos(#9, Rand) + 1);
+    t := Copy(Rand, 1);
+    if t <> '' then
+      Result.Moneda := t
+    else
+      Eroare := True;
+  end;
+  Result.Ok := not Eroare;
+end;
+
+function TFBank.PreluareExtras(Data: TStringList): integer;
+var
+  I: Integer;
+  Payment: TPayment;
+  SQL: string;
+begin
+  //elimin randurile goale
+  I := 0;
+  while I <= Data.Count - 1 do begin
+    if Trim(Data[I]) = '' then Data.Delete(I)
+    else Inc(I);
+  end;
+  Q.SQL.Text :=
+    'SELECT GROUP_CONCAT(DISTINCT NRDFC ORDER BY NRDFC DESC) NRFACT, ' +
+      'GROUP_CONCAT(DISTINCT CONCAT(MID(DATAFC,1,2),".",MID(DATAFC,3,2),".",MID(DATAFC,5,4)) ' + 
+        'ORDER BY CONCAT(MID(DATAFC,5,4),MID(DATAFC,3,2),MID(DATAFC,1,2)) DESC ) DATAFACT ' + 
+    'FROM `' + sFirma + '`.`FRES' + sDate + '` WHERE CONTFC LIKE "4111%" AND SUMADB-SUMACR <> 0';
+  Q.Open;
+  //???
+  if Q.RecordCount <> 0 then begin
+    NrFactRestante := Q.Fields[0].AsString;
+    DataFactRestante := Q.Fields[1].AsString;
+  end;
+
+  //incep procesarea
+  SQL := '';
+  for I := 0 to Data.Count - 1 do begin
+    Payment := GetPayment(Data[I]);
+    if Payment.Ok then
+      with Payment do begin
+        SQL := SQL +
+          '("' + DataPlatii + '", "' + Partener + '", "' + CodFiscal + '", "NU", "' + Cont + '", "' + Banca + '", ' +
+          IntToStr(NrOP) + ', "' + Comentarii + '", "' + Factura + '", ' + IntToStr(Ref) + ', ' +
+          FloatToStrF(Suma, ffFixed,16, 2) + ', "' + Moneda + '", "' + Factura + '", "NU", "NU"),';
+      end;
+  end;
+
+  DoSQL(Q, 'DELETE FROM `' + sFirma + '`.`EXTRASE` WHERE INCASAT = "NU"');
+  if SQL <> '' then begin
+    SQL := 'INSERT IGNORE INTO `' + sFirma + '`.`EXTRASE` ' +
+                '(DATA, DENFUR,COD_FISCAL, ECHIV, CONT, BANCA, NROP, COMENTARII, FACTURA, REF, SUMA, MONEDA, FACT_USR, VALIDAT, INCASAT) VALUES ' +
+              Copy(SQL, 1, Length(SQL) - 1);
+    DoSQL(q, SQL);
+  end;
+
+  {Echivalare}
+  SQL := 'UPDATE `' + sFirma + '`.`EXTRASE` E, `' + sFirma + '`.`ECHIV` F SET ' +
+           'E.CODFUR = F.CODFUR, ' +
+           'E.ECHIV = "DA" ' +
+         'WHERE ' +
+           'E.COD_FISCAL = F.COD_FISCAL';
+  DoSQL(q, SQL);
+  SQL := 'UPDATE `' + sFirma + '`.`EXTRASE` E, `' + sFirma + '`.`FUR` F SET ' +
+           'E.CODFUR = F.CODFUR, ' +
+           'E.ECHIV = IF(F.CODFUR<> "", "DA", "NU") ' +
+         'WHERE ' +
+           '(E.CODFUR = "") AND ' +
+           '(CONCAT(MID(E.DATA,3,2),MID(E.DATA,7,2)) = "' + sDate + '") AND ' +
+           '(REPLACE(REPLACE(UPPER(E.COD_FISCAL),"RO",""),"R","") = REPLACE(REPLACE(UPPER(F.COD_FISCAL),"RO",""),"R",""))';
+  DoSQL(q, SQL);
+  //--Ramane de facut echivalare dupa cont banca
+  {Echivalare}
+
+  DoSQL(q, 'SELECT COUNT(1) FROM `' + sFirma + '`.`EXTRASE` WHERE ECHIV="NU" GROUP BY ECHIV');
+
+  if q.RecordCount <> 0 then begin
+    iEchiv.Hint := i2s(q.RecordCount) + ' inregistrari nu au echivalenta in nomenclatorul de parteneri.';
+    iEchiv.Visible := True;
+  end else
+    iEchiv.Visible := False;
+
+  DoSQL(Q, 'DROP TABLE IF EXISTS `' + sFirma + '`.`TMPFRES`');
+  SQL := 'CREATE TABLE IF NOT EXISTS `' + sFirma + '`.`TMPFRES` (' +
+           '`NRDFC` bigint(10) NOT NULL default 0, ' +
+           '`DATAFC` char(8) NOT NULL default "", ' +
+           '`DATASC` char(8) NOT NULL default "", ' +
+           '`SUMADB` double(14,2) NOT NULL default 0.00, ' +
+           '`SUMACR` double(14,2) NOT NULL default 0.00, ' +
+           '`CONTFC` char(9) NOT NULL default "", ' +
+           '`CODFC` char(15) NOT NULL default "", ' +
+           '`GESTIUNE` char(8) NOT NULL default "", ' +
+           '`ACHITAT` double(14,2) NOT NULL default 0.00, '+
+           '`VALIDAT` char(2) NOT NULL default "", '+
+           'KEY `NRDFC` (`NRDFC`),' +
+           'KEY `CODFC` (`CODFC`) ' +
+         ') ENGINE=InnoDB DEFAULT CHARSET=latin1';
+  DoSQL(q, SQL);
+
+  SQL := 'INSERT INTO `' + sFirma + '`.`TMPFRES` ' +
+           'SELECT ' +
+             'NRDFC, DATAFC, DATASC, SUMADB, SUMACR, CONTFC, CODFC, GESTIUNE, 0 ACHITAT, "NU" VALIDAT ' +
+           'FROM `' + sFirma + '`.`FRES' + sDate + '` ' +
+           'WHERE CONTFC LIKE "4111%" AND (SUMADB-SUMACR <> 0) ' +
+           'ORDER BY NRDFC';
+  DoSQL(q, SQL);
+
+  SQL := 'SELECT ' +
+           'E.COD_FISCAL, E.DENFUR, DATA, NROP, FACTURA, SUMA, VALIDAT, E.CODFUR, COMENTARII, INCASAT, CONCAT(NROP,REF) ID_LOCATE ' +
+         'FROM `' + sFirma + '`.`EXTRASE` E ' +
+         'WHERE CONCAT(MID(DATA,3,2),MID(DATA,7,2)) = "' + sDate + '" ' +
+         'ORDER BY VALIDAT DESC, CONCAT(MID(DATA,5,4),MID(DATA,3,2),MID(DATA,1,2)) DESC';
+  DoSQL(q, SQL);
+end;
+
+procedure TFBank.btnCancelClick(Sender: TObject);
+var
+  Temp: string;
+begin
+  if BSelection.Count <> 0 then
+    if FDialog.Start('Atentie', IntToStr(BSelection.Count) + ' parteneri sunt marcati pentru deblocare.'#13 +
+         'Doriti deblocarea acestora?', fdBtn_Yes or fdBtn_No, mtConfirmation) = fdBtn_Yes then begin
+      Temp := BSelection.CommaText;
+      Temp := StringReplace(Temp, ',', '","', [rfReplaceAll]);
+      Temp := StringReplace(Temp, '""', '"', [rfReplaceAll]);
+      QTemp.SQL.Text :=
+        'UPDATE `' + sFirma + '`.`FUR` SET SECTIA = " ", FCULOARE = " " WHERE CODFUR IN ("' + Temp +'")';
+      QTemp.ExecSQL;
+    end;
+  Close;
+end;
+
+procedure TFBank.btnCodFiscalClick(Sender: TObject);
+begin
+  ReleaseButtons(Sender);
+  DBF.DataSource.DataSet.Locate('COD_FISCAL', eCauta.Text, [loCaseInsensitive, loPartialKey]);
+end;
+
+procedure TFBank.ReleaseButtons(Sender: TObject);
+begin
+  btnDenFur.Down := False;
+  btnCodFiscal.Down := False;
+  btnNumar.Down := False;
+  btnSuma.Down := False;
+  TsButton(Sender).Down := True;
+end;
+
+procedure TFBank.btnDenFurClick(Sender: TObject);
+begin
+  ReleaseButtons(Sender);
+  DBF.DataSource.DataSet.Locate('DENFUR', eCauta.Text, [loCaseInsensitive, loPartialKey]);
+end;
+
+procedure TFBank.btnNumarClick(Sender: TObject);
+begin
+  ReleaseButtons(Sender);
+  try
+    DBF.DataSource.DataSet.Locate('NRDFC', eCauta.Text, [loCaseInsensitive, loPartialKey]);
+  except end;
+end;
+
+procedure TFBank.btnSaveClick(Sender: TObject); //Needs updating
+var
+  Temp: string;
+begin
+  QTemp.SQL.Text :=
+    'INSERT INTO `' + sFirma + '`.`CM' + sDate + '` (NRN, EXPLICNT, EXPLICN, FELN, GEST, FURCLI, FURCLI2, TIPDI, NRDI, JD, DATAI, DATASC, NRDE, DATAE, DEBIT, CREDIT, SUMA, ZIUA, SUMAEX, INTIES)' +
+      'SELECT 4 NRN, "Operatii de banca" EXPLICNT, CONCAT("C.V. FACTURA ",NRDFC) EXPLICN, 1 FELN, GESTIUNE GEST, CODFC FURCLI, ' +
+        'CODFC FURCLI2, 30 TIPDI, NROP NRDI, "*" JD, DATA DATAI, DATASC, NRDFC NRDE, DATAFC DATAE, "' + ECont.Text + '" DEBIT, "4111" CREDIT, ' +
+        'ROUND(ACHITAT,2) SUMA, LEFT(DATA,2) ZIUA, ACHITAT SUMAEX, 1 INTIES ' +
+      'FROM `' + sFirma + '`.`TMPFRES` F LEFT JOIN `' + sFirma + '`.`EXTRASE` E ON F.CODFC = E.CODFUR ' +
+      'WHERE F.VALIDAT = "DA" AND E.INCASAT = "NU"';
+  QTemp.ExecSQL;
+  QTemp.SQL.Text :=
+    'UPDATE `' + sFirma + '`.`FRES' + sDate + '` F, `' + sFirma + '`.`TMPFRES` T, `' + sFirma + '`.`EXTRASE` E SET F.SUMACR = ROUND((F.SUMACR + T.ACHITAT)*1,2), E.INCASAT = "DA" ' +
+    'WHERE F.CODFC = T.CODFC AND T.VALIDAT = "DA" AND E.CODFUR = F.CODFC AND F.NRDFC = T.NRDFC';
+  QTemp.ExecSQL;
+  if BSelection.Count > 0 then begin
+    Temp := BSelection.CommaText;
+    Temp := StringReplace(Temp, ',', '","', [rfReplaceAll]);
+    Temp := StringReplace(Temp, '""', '"', [rfReplaceAll]);
+    QTemp.SQL.Text :=
+      'UPDATE `' + sFirma + '`.`FUR` SET SECTIA = " ", FCULOARE = " " WHERE CODFUR IN ("' + Temp +'")';
+    QTemp.ExecSQL;
+  end;
+  Close
+end;
+
+procedure TFBank.btnSumaClick(Sender: TObject);
+begin
+  ReleaseButtons(Sender);
+  try
+    DBF.DataSource.DataSet.Locate('SUMADB', eCauta.Text, [loCaseInsensitive, loPartialKey]);
+  except end;
+end;
+
+procedure TFBank.btnAuthPaymentClick(Sender: TObject);
+var
+  Temp: string;
+  bTemp: boolean;
+begin
+  if btnAuthPayment.Tag = 0 then begin
+    if sCodFC <> '' then begin
+      QTemp.SQL.Text :=
+        'UPDATE `' + sFirma + '`.`EXTRASE` SET CODFUR = "' + sCodFC + '" , COMENTARII = CONCAT(COMENTARII," [' + sDenFC + ']")' +
+        'WHERE CONCAT(NROP,REF) = "' + Q.FieldByName('ID_LOCATE').AsString + '"';
+      QTemp.ExecSQL;
+    end else
+      sCodFC := Q.FieldByName('CODFUR').AsString;
+    if Ramas > 0 then
+      if FDialog.Start('Atentie', 'Suma incasata nu este egala cu suma de pe extras!'#13+
+        'Sunteti sigur(a) ca doriti asta?', fdBtn_Yes or fdBtn_No, mtConfirmation) = fdBtn_No then Exit;
+    QTemp.SQL.Text :=
+      'UPDATE `' + sFirma + '`.`TMPFRES` E SET VALIDAT = "DA" ' +
+      'WHERE NRDFC IN (' + Selection.CommaText + ') AND CODFC = "' + sCodFC + '"';
+    QTemp.ExecSQL;
+    QTemp.SQL.Text :=
+      'UPDATE `' + sFirma + '`.`EXTRASE` SET FACTURA = "' + Selection.CommaText + '", VALIDAT = "DA" ' +
+      'WHERE CONCAT(NROP,REF) = "' + Q.FieldByName('ID_LOCATE').AsString + '"';
+    QTemp.ExecSQL;
+    //verify if partner is blocked
+    QTemp.SQL.Text :=
+      'SELECT SECTIA ' +
+      'FROM `' + sFirma + '`.`FUR` ' +
+      'WHERE CODFUR = "' + sCodFC + '"';
+    QTemp.Open;
+    if QTemp.RecordCount <> 0 then begin
+      if (QTemp.FieldByName('SECTIA').AsString = 'B') then begin
+        QTemp.SQL.Text :=
+          'SELECT SUM(F.SUMADB-F.SUMACR) SUMAR, SUM(T.ACHITAT) ACHITAT ' +
+          'FROM `' + sFirma + '`.`FRES' + SDate + '` F LEFT JOIN `' + sFirma + '`.`TMPFRES` T ON F.CODFC = T.CODFC ' +
+          'WHERE F.CODFC = "' + sCodFC + '" AND F.CONTFC LIKE "4111%" AND T.VALIDAT = "DA" ' +
+          'GROUP BY F.CODFC';
+        QTemp.Open;
+        if FDialog.Start('Atentie', 'Partenerul in cauza este blocat. Din suma restanta de ' +
+             QTemp.FieldByName('SUMAR').AsString + ' RON s-a achitat pana acum ' +
+             QTemp.FieldByName('ACHITAT').AsString+ #13 +
+             'Doriti deblocarea acestuia?', fdBtn_Yes or fdBtn_No, mtConfirmation) = fdBtn_Yes then
+          BSelection.Add(sCodFC);
+      end;
+    end;
+    sCodFC := '';
+    btnAuthPayment.Tag := 1;
+    btnAuthPayment.Caption := 'Fara achitare';
+    Temp := Q.FieldByName('ID_LOCATE').AsString;
+    Q.Close;
+    Q.Open;
+    DBG.SetFocus;
+    bTemp := Q.Locate('ID_LOCATE',Temp,[loCaseInsensitive]);
+    Q.Next;
+    ShowOPDetails;
+  end else begin
+    QTemp.SQL.Text :=
+      'UPDATE `' + sFirma + '`.`TMPFRES` E SET VALIDAT = "NU" ' +
+      'WHERE NRDFC IN (' + Selection.CommaText + ') AND CODFC = "' + Q.FieldByName('CODFUR').AsString + '"';
+    QTemp.ExecSQL;
+    QTemp.SQL.Text :=
+      'UPDATE `' + sFirma + '`.`EXTRASE` SET FACTURA = FACT_USR, VALIDAT = "NU" ' +
+      'WHERE CONCAT(NROP,REF) = "' + Q.FieldByName('ID_LOCATE').AsString + '"';
+    QTemp.ExecSQL;
+    //clears the partner from unblocking list
+    if BSelection.IndexOf(sCodFC) >= 0 then BSelection.Delete(BSelection.IndexOf(sCodFC));
+    Temp := Q.FieldByName('ID_LOCATE').AsString;
+    Q.Close;
+    Q.Open;
+    Q.Locate('ID_LOCATE',Temp,[loCaseInsensitive]);
+    btnAuthPayment.Tag := 0;
+    btnAuthPayment.Caption := 'Valideaza plata';
+  end;
+  //if Ramas <> 0 then FDialog.Start('Atentie', 'Suma incasata nu este egala cu suma de pe extras!', fdOk, mtWarning);
+end;
+
+procedure TFBank.btnProcessDumpClick(Sender: TObject);
+var
+  tsTemp: TStringList;
+  sTemp: string;
+begin
+  tsTemp := TStringList.Create;
+  if Browser = '1' {Chrome} then begin
+    sTemp := StringReplace(mDump.Lines.Text, #13#10, #9, [rfReplaceAll]);
+    sTemp := StringReplace(sTemp,#9'RON'#9, #9'RON'#13#10, [rfReplaceAll]);
+    mDump.Lines.Text := sTemp;
+    tsTemp.Text := sTemp;
+  end;
+  if tsTemp.Count <> 0 then PreluareExtras(tsTemp);
+  tsTemp.Free;
+end;
+
+end.

@@ -1,0 +1,533 @@
+object FExtrase: TFExtrase
+  Left = 0
+  Top = 300
+  Caption = 'Extrase'
+  ClientHeight = 413
+  ClientWidth = 658
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  Position = poDesigned
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnKeyPress = FormKeyPress
+  OnShow = FormShow
+  DesignSize = (
+    658
+    413)
+  PixelsPerInch = 96
+  TextHeight = 16
+  object mDump: TMemo
+    Left = 16
+    Top = 467
+    Width = 350
+    Height = 91
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Courier New'
+    Font.Style = []
+    ParentFont = False
+    ScrollBars = ssBoth
+    TabOrder = 1
+  end
+  object btnProcessDump: TsButton
+    Left = 542
+    Top = 382
+    Width = 19
+    Height = 19
+    Margins.Left = 0
+    Margins.Top = 0
+    Margins.Right = 0
+    Margins.Bottom = 0
+    Anchors = [akLeft, akBottom]
+    Caption = ' R'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 0
+    OnClick = btnProcessDumpClick
+    SkinData.SkinSection = 'BUTTON'
+    ExplicitTop = 446
+  end
+  object btnCancel: TsButton
+    Left = 339
+    Top = 376
+    Width = 75
+    Height = 30
+    Anchors = [akLeft, akBottom]
+    Caption = 'Renunta'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 2
+    OnClick = btnCancelClick
+    SkinData.SkinSection = 'BUTTON'
+    ExplicitTop = 440
+  end
+  object btnSave: TsButton
+    Left = 243
+    Top = 376
+    Width = 75
+    Height = 30
+    Anchors = [akLeft, akBottom]
+    Caption = 'Salveaza'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 3
+    OnClick = btnSaveClick
+    SkinData.SkinSection = 'BUTTON'
+    ExplicitTop = 440
+  end
+  object sPanel1: TsPanel
+    Left = 0
+    Top = 0
+    Width = 658
+    Height = 161
+    Align = alTop
+    TabOrder = 4
+    SkinData.SkinSection = 'PANEL'
+    DesignSize = (
+      658
+      161)
+    object DBG: TDBGrid
+      Left = 7
+      Top = 7
+      Width = 644
+      Height = 146
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
+      TabStop = False
+      Anchors = [akLeft, akTop, akRight, akBottom]
+      Ctl3D = False
+      DataSource = DS
+      FixedColor = 16744576
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      Options = [dgTitles, dgColumnResize, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit]
+      ParentCtl3D = False
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 0
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clWindowText
+      TitleFont.Height = -11
+      TitleFont.Name = 'Tahoma'
+      TitleFont.Style = [fsBold]
+      OnCellClick = DBGCellClick
+      OnDrawColumnCell = DBGDrawColumnCell
+      OnKeyUp = DBGKeyUp
+      Columns = <
+        item
+          Expanded = False
+          FieldName = 'COD_FISCAL'
+          Title.Alignment = taCenter
+          Title.Caption = 'COD FISCAL'
+          Width = 62
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'DENFUR'
+          Title.Alignment = taCenter
+          Title.Caption = 'PARTENER'
+          Width = 172
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'DATA'
+          Title.Alignment = taCenter
+          Width = 60
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'NROP'
+          Title.Alignment = taCenter
+          Title.Caption = 'NR OP'
+          Width = 40
+          Visible = True
+        end
+        item
+          Alignment = taRightJustify
+          Expanded = False
+          FieldName = 'FACTURA'
+          Title.Alignment = taCenter
+          Width = 90
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'SUMA'
+          Title.Alignment = taCenter
+          Title.Caption = 'INCASAT'
+          Width = 60
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'VALIDAT'
+          Title.Alignment = taCenter
+          Title.Caption = '!!!'
+          Width = 18
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'CODFUR'
+          Title.Alignment = taCenter
+          Visible = False
+        end
+        item
+          Expanded = False
+          FieldName = 'COMENTARII'
+          Visible = False
+        end
+        item
+          Expanded = False
+          FieldName = 'INCASAT'
+          Title.Alignment = taCenter
+          Title.Caption = '!!!'
+          Width = 18
+          Visible = True
+        end>
+    end
+  end
+  object sPanel2: TsPanel
+    Left = 0
+    Top = 161
+    Width = 658
+    Height = 208
+    Align = alTop
+    TabOrder = 5
+    SkinData.SkinSection = 'PANEL'
+    DesignSize = (
+      658
+      208)
+    object pAchitat: mslabelFX
+      Left = 332
+      Top = 167
+      Width = 115
+      Height = 30
+      Alignment = taRightJustify
+      Anchors = [akRight, akBottom]
+      AutoSize = False
+      Caption = '1240.00'
+      ParentFont = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -21
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ExplicitTop = 143
+    end
+    object pRamas: mslabelFX
+      Left = 454
+      Top = 167
+      Width = 115
+      Height = 30
+      Alignment = taRightJustify
+      Anchors = [akRight, akBottom]
+      AutoSize = False
+      Caption = '1240.00'
+      ParentFont = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -21
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ExplicitTop = 143
+    end
+    object pComment: mslabelFX
+      Left = 7
+      Top = 158
+      Width = 319
+      Height = 41
+      Anchors = [akLeft, akRight, akBottom]
+      AutoSize = False
+      Caption = 'Acesta este un text lung care, sper eu, va fi impartit pe linii.'
+      ParentFont = False
+      WordWrap = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -15
+      Font.Name = 'Arial'
+      Font.Style = []
+      ExplicitTop = 134
+    end
+    object sButton1: TsButton
+      Left = 332
+      Top = 128
+      Width = 75
+      Height = 25
+      Anchors = [akRight, akBottom]
+      Caption = 'Denumire'
+      TabOrder = 0
+      SkinData.SkinSection = 'BUTTON'
+      ExplicitTop = 104
+    end
+    object sButton2: TsButton
+      Left = 413
+      Top = 128
+      Width = 75
+      Height = 25
+      Anchors = [akRight, akBottom]
+      Caption = 'Cod fiscal'
+      TabOrder = 1
+      SkinData.SkinSection = 'BUTTON'
+      ExplicitTop = 104
+    end
+    object sButton3: TsButton
+      Left = 494
+      Top = 128
+      Width = 75
+      Height = 25
+      Anchors = [akRight, akBottom]
+      Caption = 'Numar'
+      TabOrder = 2
+      SkinData.SkinSection = 'BUTTON'
+      ExplicitTop = 104
+    end
+    object sButton4: TsButton
+      Left = 575
+      Top = 128
+      Width = 75
+      Height = 25
+      Anchors = [akRight, akBottom]
+      Caption = 'Suma'
+      TabOrder = 3
+      SkinData.SkinSection = 'BUTTON'
+      ExplicitTop = 104
+    end
+    object ECauta: TsEdit
+      Left = 7
+      Top = 128
+      Width = 319
+      Height = 24
+      Anchors = [akLeft, akRight, akBottom]
+      Color = clWhite
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 4
+      Text = 'ECauta'
+      SkinData.SkinSection = 'EDIT'
+      BoundLabel.Indent = 0
+      BoundLabel.Font.Charset = DEFAULT_CHARSET
+      BoundLabel.Font.Color = clWindowText
+      BoundLabel.Font.Height = -11
+      BoundLabel.Font.Name = 'Tahoma'
+      BoundLabel.Font.Style = []
+      BoundLabel.Layout = sclLeft
+      BoundLabel.MaxWidth = 0
+      BoundLabel.UseSkinColor = True
+      ExplicitTop = 104
+    end
+    object sPanel5: TsPanel
+      Left = 5
+      Top = 5
+      Width = 648
+      Height = 118
+      Anchors = [akLeft, akTop, akRight, akBottom]
+      Caption = 'sPanel5'
+      TabOrder = 5
+      SkinData.SkinSection = 'PANEL'
+      ExplicitHeight = 94
+      DesignSize = (
+        648
+        118)
+      object DBF: TDBGrid
+        Left = 6
+        Top = 6
+        Width = 636
+        Height = 105
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        TabStop = False
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        Ctl3D = False
+        DataSource = DSF
+        FixedColor = 16744576
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        Options = [dgTitles, dgColumnResize, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit]
+        ParentCtl3D = False
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 0
+        TitleFont.Charset = DEFAULT_CHARSET
+        TitleFont.Color = clWindowText
+        TitleFont.Height = -11
+        TitleFont.Name = 'Tahoma'
+        TitleFont.Style = [fsBold]
+        OnDrawColumnCell = DBFDrawColumnCell
+        OnKeyPress = DBFKeyPress
+        Columns = <
+          item
+            Expanded = False
+            FieldName = 'NRDFC'
+            Title.Alignment = taCenter
+            Title.Caption = 'NUMAR'
+            Visible = True
+          end
+          item
+            Expanded = False
+            FieldName = 'DATAFC'
+            Title.Alignment = taCenter
+            Title.Caption = 'DATA'
+            Width = 70
+            Visible = True
+          end
+          item
+            Expanded = False
+            FieldName = 'SUMADB'
+            Title.Alignment = taCenter
+            Title.Caption = 'SUMA'
+            Visible = True
+          end
+          item
+            Expanded = False
+            FieldName = 'SUMACR'
+            Title.Alignment = taCenter
+            Title.Caption = 'ACHITAT'
+            Visible = True
+          end
+          item
+            Expanded = False
+            FieldName = 'RAMAS'
+            Title.Alignment = taCenter
+            Title.Caption = 'REST'
+            Visible = True
+          end
+          item
+            Expanded = False
+            FieldName = 'REST'
+            Visible = False
+          end
+          item
+            Expanded = False
+            FieldName = 'VALIDAT'
+            Visible = False
+          end
+          item
+            Expanded = False
+            FieldName = 'DENFUR'
+            Title.Caption = 'DENUMIRE'
+            Visible = False
+          end>
+      end
+    end
+    object btnAuthPayment: TsButton
+      Left = 575
+      Top = 159
+      Width = 76
+      Height = 40
+      Anchors = [akRight, akBottom]
+      Caption = 'Valideaza plata'
+      TabOrder = 6
+      OnClick = btnAuthPaymentClick
+      SkinData.SkinSection = 'BUTTON'
+      ExplicitTop = 135
+    end
+  end
+  object ECont: TsEdit
+    Left = 580
+    Top = 388
+    Width = 78
+    Height = 24
+    Color = clWhite
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 6
+    Text = 'ECont'
+    SkinData.SkinSection = 'EDIT'
+    BoundLabel.Indent = 0
+    BoundLabel.Font.Charset = DEFAULT_CHARSET
+    BoundLabel.Font.Color = clWindowText
+    BoundLabel.Font.Height = -11
+    BoundLabel.Font.Name = 'Tahoma'
+    BoundLabel.Font.Style = []
+    BoundLabel.Layout = sclLeft
+    BoundLabel.MaxWidth = 0
+    BoundLabel.UseSkinColor = True
+  end
+  object DS: TDataSource
+    DataSet = Q
+    Left = 40
+    Top = 48
+  end
+  object Q: TQuery
+    DatabaseName = 'dsTest'
+    ParamCheck = False
+    SQL.Strings = (
+      
+        'SELECT COD_FISCAL, DENFUR, DATA, NROP, FACTURA, DATAFC, SUMADB, ' +
+        'SUMACR, SUMA, "NU" VALIDAT, CODFUR FROM (SELECT E.*, CODFUR FROM' +
+        ' EXTRASE E LEFT JOIN FUR F ON (E.COD_FISCAL = F.COD_FISCAL) OR (' +
+        'CONCAT("RO",E.COD_FISCAL) = F.COD_FISCAL) OR (E.COD_FISCAL = CON' +
+        'CAT("RO",F.COD_FISCAL))) EXT LEFT JOIN FRES0910 F ON EXT.CODFUR ' +
+        '= F.CODFC')
+    Left = 8
+    Top = 48
+  end
+  object QF: TQuery
+    DatabaseName = 'dsTest'
+    ParamCheck = False
+    SQL.Strings = (
+      
+        'SELECT NRDFC, DATAFC, SUMADB, SUMACR, SUMADB-SUMACR TOTAL, 0 RES' +
+        'T FROM FRES0910')
+    Left = 8
+    Top = 80
+  end
+  object DSF: TDataSource
+    DataSet = QF
+    Left = 40
+    Top = 80
+  end
+  object QTemp: TQuery
+    DatabaseName = 'dsTest'
+    ParamCheck = False
+    SQL.Strings = (
+      
+        'SELECT NRDFC, DATAFC, SUMADB, SUMACR, SUMADB-SUMACR TOTAL, 0 RES' +
+        'T FROM FRES0910')
+    Left = 8
+    Top = 112
+  end
+end

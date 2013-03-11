@@ -1,0 +1,494 @@
+unit Sesiz_Detail;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, ExtCtrls, ComCtrls, Grids, DB, DBTables, DBGrids, AlexUtils,
+  IdCoder, IdCoder3to4, IdCoderMIME, dsEditGrid;
+
+type
+  TSesizDetail = class(TForm)
+    EID: TLabeledEdit;
+    EClient: TLabeledEdit;
+    DApel: TDateTimePicker;
+    DProgramat: TDateTimePicker;
+    Label1: TLabel;
+    Label2: TLabel;
+    Btn_Detalii: TButton;
+    Label3: TLabel;
+    Problema: TMemo;
+    Label4: TLabel;
+    CPentru: TComboBox;
+    CPublic: TCheckBox;
+    Label5: TLabel;
+    Label7: TLabel;
+    DBRezolvari: TDBGrid;
+    Btn_Renunta: TButton;
+    Btn_Salveaza: TButton;
+    Query: TQuery;
+    DS: TDataSource;
+    PBottom: TPanel;
+    SRez: TShape;
+    TempDB: TDBGrid;
+    procedure FormShow(Sender: TObject);
+    procedure Btn_RenuntaClick(Sender: TObject);
+    procedure Btn_SalveazaClick(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure Btn_DetaliiClick(Sender: TObject);
+    procedure DBRezolvariDrawColumnCell(Sender: TObject; const Rect: TRect;
+      DataCol: Integer; Column: TColumn; State: TGridDrawState);
+    procedure EIDKeyPress(Sender: TObject; var Key: Char);
+    procedure EClientKeyPress(Sender: TObject; var Key: Char);
+    procedure DApelKeyPress(Sender: TObject; var Key: Char);
+    procedure CPentruKeyPress(Sender: TObject; var Key: Char);
+    procedure EClientEnter(Sender: TObject);
+    procedure DApelEnter(Sender: TObject);
+    procedure DProgramatExit(Sender: TObject);
+    procedure CPublicKeyPress(Sender: TObject; var Key: Char);
+    procedure CPentruEnter(Sender: TObject);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure DBRezolvariDblClick(Sender: TObject);
+    procedure DBRezolvariKeyPress(Sender: TObject; var Key: Char);
+    procedure FirmePopulate;
+    procedure EClientExit(Sender: TObject);
+    procedure EClientKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    function Start(ID, Stare: string): integer;
+  end;
+  function Base64Encode(const Text : ansiString): ansiString;
+  function Base64Decode(const Text : ansiString): ansiString;
+
+var
+  SesizDetail: TSesizDetail;
+  sID: string;
+  State: string;
+  sCodFC: string;
+  Rezolvat: string;
+  Clienti: TStringList;
+  TempQuery: TQuery;
+  TempDS: TDataSource;
+
+implementation
+
+uses Fur_Detail, FRezolvare, FMain;
+
+{$R *.dfm}
+
+procedure TSesizDetail.Btn_DetaliiClick(Sender: TObject);
+var
+  QAux: TQuery;
+  SQL: string;
+  I: integer;
+begin
+  QAux := TQuery.Create(SesizDetail);
+  QAux.DatabaseName := MainForm.DB.DatabaseName;
+  SQL := 'SELECT CODFUR, DENFUR, SECTIA AS STARE, COUNT(CODFUR) AS NRFACT, SUM(SUMADB-SUMACR) AS SUMA, FIRMA, CONTRACT ' +
+         'FROM (SELECT * FROM (';
+  for I := 0 to MainForm.CGest.Items.Count - 1 do
+    SQL := SQL +
+      'SELECT CODFUR, DENFUR, SECTIA, SUMADB, SUMACR, "' + MainForm.CGest.Items[I] + '" AS FIRMA, CONCAT(CONT_DM, CONT_USD) AS CONTRACT ' +
+      'FROM `' + MainForm.CGest.Items[I] + '`.`FUR` INNER JOIN `' + MainForm.CGest.Items[I] + '`.`FRES' + SDate + '` ON CODFUR = CODFC ' +
+      'WHERE (CONTFC="4111") AND ((SUMADB-SUMACR) <> 0) AND (COD_FISCAL = "' + EClient.Hint + '") UNION ALL ';
+  SQL := Copy(SQL, 1, Length(SQL) - 11) + ') AS TEMP ORDER BY CONTRACT DESC) AS TEMP2 GROUP BY CODFUR';
+  QAux.SQL.Text := SQL;
+  QAux.Open;
+  if QAux.RecordCount = 0 then begin
+  SQL := 'SELECT CODFUR, DENFUR, SECTIA AS STARE, FIRMA, CONTRACT ' +
+         'FROM (SELECT * FROM(';
+  for I := 0 to MainForm.CGest.Items.Count - 1 do
+    SQL := SQL +
+      'SELECT CODFUR, DENFUR, SECTIA, "' + MainForm.CGest.Items[I] + '" AS FIRMA, CONCAT(CONT_DM, CONT_USD) AS CONTRACT ' +
+      'FROM `' + MainForm.CGest.Items[I] + '`.`FUR` ' +
+      'WHERE (COD_FISCAL = "' + EClient.Hint + '") UNION ALL ';
+    SQL := Copy(SQL, 1, Length(SQL) - 11) + ') AS TEMP ORDER BY CONTRACT DESC) AS TEMP2 GROUP BY CODFUR';
+    QAux.SQL.Text := SQL;
+    QAux.Open;
+    FurDetail.Start(SDate, QAux.Fields[0].AsString, QAux.Fields[1].AsString, QAux.Fields[2].AsString, '0', '0', QAux.Fields[3].AsString);
+  end else
+    FurDetail.Start(SDate, QAux.Fields[0].AsString, QAux.Fields[1].AsString, QAux.Fields[2].AsString, QAux.Fields[3].AsString, QAux.Fields[4].AsString, QAux.Fields[5].AsString);
+  QAux.Free;
+end;
+
+procedure TSesizDetail.Btn_RenuntaClick(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TSesizDetail.Btn_SalveazaClick(Sender: TObject);
+var
+  sPublic: string;
+  Temp: string;
+begin
+  Temp := TStringsToString(Problema.Lines, '||C10||');
+  Temp := StringReplace(Temp, '"', '||GLM||', [rfReplaceAll]);
+  Temp := StringReplace(Temp, '''', '||APS||', [rfReplaceAll]);
+  Temp := StringReplace(Temp, '&', '||AND||', [rfReplaceAll]);
+  Temp := StringReplace(Temp, '"', '||GLM||', [rfReplaceAll]);
+  Temp := StringReplace(Temp, '<', '||LT||', [rfReplaceAll]);
+  Temp := StringReplace(Temp, '>', '||GT||', [rfReplaceAll]);
+  Temp := Base64Encode(Temp);
+  sPublic := 'NU';
+  if CPublic.Checked then sPublic := 'DA';
+  if State = 'M' then begin //Modifica
+    Query.SQL.Text :=
+      'UPDATE FDSOFT.AGENDA_MNG SET ' +
+        'DATA_POST = "' + MySQLDateToStr(DApel.Date, 'YYYY-MM-DD') + '", ' +
+        'DATA_PROG = "' + MySQLDateToStr(DProgramat.Date, 'YYYY-MM-DD') + '", ' +
+        'DENFUR = "' + EClient.Text + '", ' +
+        'TEXT = "' + Temp + '", ' +
+        'UTILIZATOR = "' + CPentru.Text + '", ' +
+        'UTILIZATOR_POST = "' + StringReplace(UpperCase(Copy(UMail, 1, Pos('@', UMail) - 1)), 'TEO', 'TEODORA', [rfReplaceAll]) + '", ' +
+        'CODFUR = "' + EClient.Hint + '", ' +
+        'PUBLIC = "' + sPublic + '", ' +
+        'BIFAT_OK = "' + Rezolvat + '" ' +
+      'WHERE ROW_ID = ' + EID.Text;
+    Query.ExecSQL;
+  end else begin //Adauga
+    if sCodFC = '' then sCodFC := 'NOU';
+    Query.SQL.Text :=
+      'INSERT INTO FDSOFT.AGENDA_MNG (DATA_POST, DATA_PROG, ORA_PROG, DENFUR, TEXT, UTILIZATOR, UTILIZATOR_POST, CODFUR, PUBLIC, BIFAT_OK) VALUES (' +
+        '"' + MySQLDateToStr(DApel.Date, 'YYYY-MM-DD') + '", ' +
+        '"' + MySQLDateToStr(DProgramat.Date, 'YYYY-MM-DD') + '", ' +
+        '"16:30:00", ' +
+        '"' + EClient.Text + '", ' +
+        //'"' + StringReplace(StringReplace(TStringsToString(Problema.Lines, '||C10||'), '"', '<ghilimele>', [rfReplaceAll]), '*', '<steluta>', [rfReplaceAll]) + '", ' +
+        '"' + Temp + '", ' +
+        '"' + CPentru.Text + '", ' +
+        '"' + StringReplace(UpperCase(Copy(UMail, 1, Pos('@', UMail) - 1)), 'TEO', 'TEODORA', [rfReplaceAll]) + '", ' +
+        '"' + EClient.Hint + '", ' +
+        '"' + sPublic + '", ' +
+        '"NU")';  //REZOLVAT
+//      'WHERE ROW_ID = ' + EID.Text;
+    Query.ExecSQL;
+  end;
+  Close;
+end;
+
+procedure TSesizDetail.CPentruEnter(Sender: TObject);
+begin
+  CPentru.DroppedDown := True;
+end;
+
+procedure TSesizDetail.CPentruKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then SelectNext(TComboBox(Sender), True, True)
+end;
+
+procedure TSesizDetail.CPublicKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then SelectNext(TCheckBox(Sender), True, True)
+end;
+
+procedure TSesizDetail.DApelEnter(Sender: TObject);
+begin
+  (Sender as TDateTimePicker).Color := clSkyBlue;
+end;
+
+procedure TSesizDetail.DApelKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then SelectNext(TDateTimePicker(Sender), True, True)
+end;
+
+procedure TSesizDetail.DBRezolvariDblClick(Sender: TObject);
+begin
+  if Rezolvare.Start(Query.FieldByName('ROW_ID').AsString, EID.Text) = 1 then begin
+    Rezolvat := 'DA';
+    Btn_SalveazaClick(Self);
+  end;
+  Query.SQL.Text := 'SELECT TEXT_REZOLVAT, UPPER(BIFAT_DE) AS BIFAT_DE, BIFAT_OK, ROW_ID FROM FDSOFT.AGENDA_MNG WHERE ROW_ID = ' + EID.Text;
+  Query.Open;
+end;
+
+procedure TSesizDetail.DBRezolvariDrawColumnCell(Sender: TObject;
+  const Rect: TRect; DataCol: Integer; Column: TColumn; State: TGridDrawState);
+var
+  ARect: TRect;
+  S: string;
+begin
+  ARect := Rect;
+  if Rect.Top = 0 then Exit;
+  //S := StringReplace(Column.Field.Text, ',', #13, [rfReplaceAll]);
+  S := Column.Field.AsString;
+  S := StringReplace(S, '<ghilimele>', '"', [rfReplaceAll]);
+  S := StringReplace(S, '<steluta>', '*', [rfReplaceAll]);
+  S := StringReplace(S, '||C10||', ';', [rfReplaceAll]);
+  if gdSelected in State then begin
+    (Sender as TDBGrid).Canvas.Brush.Color := PozCur;
+    (Sender as TDBGrid).Canvas.Font.Color := clWhite;
+  end;
+  (Sender as TDBGrid).Canvas.FillRect(Rect);
+  ARect.Left := Rect.Left + 2;
+  if (Column.Index < 2) and (Column.Index < 3) then
+    DrawText((Sender as TDBGrid).Canvas.Handle, PChar(S), Length(S), ARect, 1);
+  if (Column.Index > 1) then
+    DrawText((Sender as TDBGrid).Canvas.Handle, PChar(S), Length(S), ARect, 0);
+end;
+
+procedure TSesizDetail.DBRezolvariKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then DBRezolvariDblClick(Self);
+end;
+
+procedure TSesizDetail.DProgramatExit(Sender: TObject);
+begin
+  (Sender as TDateTimePicker).Color := clWhite;
+end;
+
+procedure TSesizDetail.FirmePopulate;
+var
+  SQLText: String;
+  I: integer;
+  QTemp: TQuery;
+begin
+  QTemp := TQuery.Create(SesizDetail);
+  QTemp.DatabaseName := MainForm.DB.DatabaseName;
+  SQLText := 'SELECT DISTINCT DENFUR, CODFUR FROM (';
+  for I := 0 to MainForm.CGest.Items.Count - 1 do
+    SQLText := SQLText + 'SELECT DENFUR, CODFUR FROM `' + MainForm.CGest.Items[I] + '`.`FUR` UNION ALL ';
+  QTemp.SQL.Text := Copy(SQLText, 1, Length(SQLText) - 11) + ') AS TEMP ORDER BY DENFUR';
+  QTemp.Active := True;
+  Clienti.Clear;
+  QTemp.Next;
+  while not QTemp.Eof do begin
+    Clienti.Add(QTemp.FieldByName('DENFUR').AsString + '|' + QTemp.FieldByName('CODFUR').AsString);
+    QTemp.Next;
+  end;
+end;
+
+procedure TSesizDetail.EClientEnter(Sender: TObject);
+begin
+  (Sender as TLabeledEdit).Color := clSkyBlue;
+end;
+
+procedure TSesizDetail.EClientExit(Sender: TObject);
+var
+  I: integer;
+  SQL: string;
+begin
+  (Sender as TLabeledEdit).Color := clWindow;
+  if State = 'A' then 
+    if Clienti.IndexOf(EClient.Text + '|' + EClient.Hint) > - 1 then begin
+      if TempQuery = nil then TempQuery := TQuery.Create(Self);
+      TempQuery.DatabaseName := MainForm.DB.DatabaseName;
+      SQL := 'SELECT DISTINCT * FROM (';
+      for I := 0 to MainForm.CGest.Items.Count - 1 do
+         SQL := SQL + 'SELECT DENFUR, CODFUR, FTIP, SECTIA, CONCAT(CONT_DM, CONT_USD) AS CONTRACT, ADRF, TELEFON, EMAIL FROM `' + MainForm.CGest.Items[I] + '`.`FUR` WHERE DENFUR = "' + EClient.Text + '" UNION ALL ';
+      TempQuery.SQL.Text := Copy(SQL, 1, Length(SQL) - 11) + ') AS TEMP GROUP BY CONTRACT, CODFUR, DENFUR ORDER BY DENFUR, CONTRACT';
+      TempQuery.Active := True;
+      if TempQuery.RecordCount = 1 then
+        with TempQuery do begin
+          {EAdr.Text := FieldByName('ADRF').AsString;
+          EEMail.Text := LowerCase(FieldByName('EMAIL').AsString);
+          ETel.Text := FieldByName('TELEFON').AsString;
+          EFax.SetFocus;         }
+        end
+      else begin
+        TempDS := TDataSource.Create(SesizDetail);
+        TempDS.DataSet := TempQuery;
+        TempDB.DataSource := TempDS;
+        TempDB.Visible := True;
+        TempDB.Height := 85;
+        TempDB.SetFocus;
+      end;
+    end;
+end;
+
+procedure TSesizDetail.EClientKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then SelectNext(TEdit(Sender), True, True)
+  else
+    Key := UpCase(Key)
+end;
+
+procedure TSesizDetail.EClientKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  tsAux: TStringList;
+  I: Integer;
+  Temp: string;
+begin
+  if (Key in [VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN, VK_HOME, VK_END, VK_INSERT, VK_BACK, VK_DELETE, VK_PRIOR, VK_NEXT]) then Exit;
+  ShowMEssage(Clienti[0]);
+  Temp := EClient.Text;
+  tsAux := TStringList.Create;
+  tsAux := Clienti;
+  for I := 0 to tsAux.Count - 1 do
+    if Copy(tsAux[I], 1, Length(EClient.Text)) = EClient.Text then begin
+      EClient.Text := Copy(tsAux[I], 1, Pos('|', tsAux[I]) - 1);
+      EClient.SelStart := Length(Temp);
+      EClient.SelLength := Length(EClient.Text) - Length(Temp);
+      EClient.Hint := Copy(tsAux[I], Pos('|', tsAux[I]) + 1);
+      tsAux.Free;
+      Exit;
+    end;
+  if tsAux <> nil then tsAux.Free;
+end;
+
+procedure TSesizDetail.EIDKeyPress(Sender: TObject; var Key: Char);
+begin
+  Key := #0;
+end;
+
+procedure TSesizDetail.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #27 then Close;
+end;
+
+procedure TSesizDetail.FormKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  Temp: string;  
+begin
+  if State = 'M' then begin
+    if (Key = VK_F4) and (not (ssAlt in Shift)) then begin
+      if Rezolvare.Start('#', EID.Text) = 1 then begin
+        Rezolvat := 'DA';
+        Btn_SalveazaClick(Self);
+      end;
+      Query.SQL.Text := 'SELECT TEXT_REZOLVAT, UPPER(BIFAT_DE) AS BIFAT_DE, BIFAT_OK, ROW_ID FROM FDSOFT.AGENDA_MNG WHERE ROW_ID = ' + EID.Text;
+      Query.Open;
+      if Query.RecordCount <> 0 then begin
+        DBRezolvari.Visible := True;
+        Label7.Visible := True;
+        PBottom.Top := 446;
+        Btn_Salveaza.Top := 468;
+        Btn_Renunta.Top := 468;
+        SesizDetail.ClientHeight := 496;
+      end;
+    end;
+    if (Key = VK_F6) and (DBRezolvari.Visible) then DBRezolvariDblClick(Self);
+    Temp := Query.FieldByName('ROW_ID').AsString;
+    if Key = VK_DELETE then begin
+      if MessageDlg('Esti sigur ca vrei asta?', mtWarning, mbYesNo, 0) = mrYes then begin
+        Query.SQL.Text :=
+          'UPDATE FDSOFT.AGENDA_MNG SET ' +
+            'TEXT_REZOLVAT = "", ' +
+            'BIFAT_DE = "", ' +
+            'BIFAT_OK = "NU" ' +
+          'WHERE ROW_ID = ' + Temp;
+        Query.ExecSQL;
+      end;
+      Query.SQL.Text := 'SELECT TEXT_REZOLVAT, UPPER(BIFAT_DE) AS BIFAT_DE, BIFAT_OK, ROW_ID FROM FDSOFT.AGENDA_MNG WHERE ROW_ID = ' + EID.Text;
+      Query.Open;
+      if Query.FieldByName('BIFAT_OK').AsString = 'NU' then begin
+        DBRezolvari.Visible := False;
+        Label7.Visible := False;
+        //PBottom.Visible := False;
+        PBottom.Top := 319 + 25 + 3;
+        Btn_Salveaza.Top := 319;
+        Btn_Renunta.Top := 319;
+        SesizDetail.ClientHeight := 319 + 25 + 3 + 18;
+      end;
+    end;
+  end;
+end;
+
+function Base64Decode(const Text : ansiString): ansiString;
+var
+  Decoder : TIdDecoderMime;
+begin
+  Decoder := TIdDecoderMime.Create(nil);
+  try
+    Result := Decoder.DecodeString(Text);
+  finally
+    FreeAndNil(Decoder)
+  end
+end;
+
+function Base64Encode(const Text : ansiString): ansiString;
+var
+  Encoder : TIdEncoderMime;
+  Stream: TStringStream;
+begin
+  Encoder := TIdEncoderMime.Create(nil);
+  try
+    Result := Encoder.Encode(Text);
+  finally
+    FreeAndNil(Encoder);
+  end
+end;
+
+procedure TSesizDetail.FormShow(Sender: TObject);
+var
+  Aux: string;
+begin
+  Rezolvat := 'NU';
+  Color := MainForm.Color;
+  CPentru.Items.CommaText := ListaAngajati;
+  CPentru.Items.Add('TOTI');
+  if State = 'M' then begin
+    Caption := 'Modificare sesizare';
+    Query.SQL.Text :=
+      'SELECT ROW_ID, DATA_POST, DATA_PROG, ORA_PROG, TEXT, UPPER(UTILIZATOR), UPPER(UTILIZATOR_POST), ' +
+        'PUBLIC, CODFUR, UPPER(DENFUR), TEXT_REZOLVAT, UPPER(BIFAT_DE), BIFAT_OK ' +
+      'FROM FDSOFT.AGENDA_MNG WHERE ROW_ID = ' + sID;
+    Query.Open;
+    EID.Text := Query.FieldByName('ROW_ID').AsString;
+    EClient.Text := Query.FieldByName('UPPER(DENFUR)').AsString;
+    EClient.Hint := Query.FieldByName('CODFUR').AsString;
+    //EPersoana.Text := Query.FieldByName('PERSOANA').AsString;
+    //ETelefon.Text := Query.FieldByName('TELEFON').AsString;
+    DApel.Date := Query.FieldByName('DATA_POST').AsDateTime;
+    DProgramat.Date := Query.FieldByName('DATA_POST').AsDateTime;
+    Aux := Base64Decode(Query.FieldByName('TEXT').AsString);
+    Aux := StringReplace(Aux, '||C10||', #13#10, [rfReplaceAll]);
+    Aux := StringReplace(Aux, '||AND||', '&', [rfReplaceAll]);
+    Aux := StringReplace(Aux, '||GLM||', '"', [rfReplaceAll]);
+    Aux := StringReplace(Aux, '||LT||', '<', [rfReplaceAll]);
+    Aux := StringReplace(Aux, '||GT||', '>', [rfReplaceAll]);
+    Aux := StringReplace(Aux, '||APS||', '''', [rfReplaceAll]);
+    Problema.Lines.Text := Aux;
+    CPentru.ItemIndex := CPentru.Items.IndexOf(Query.FieldByName('UPPER(UTILIZATOR)').AsString);
+    if Query.FieldByName('BIFAT_OK').AsString = 'DA' then begin
+      SRez.Brush.Color := clGreen;
+      SRez.Hint := 'Sesizare rezolvata';
+    end;
+    sCodFC := Query.FieldByName('CODFUR').AsString;
+    if (sCodFC = '') or (sCodFC = 'NOU') then Btn_Detalii.Visible := False;
+    CPublic.Checked := Query.FieldByName('PUBLIC').AsString = 'DA';
+    Query.SQL.Text := 'SELECT TEXT_REZOLVAT, UPPER(BIFAT_DE) AS BIFAT_DE, BIFAT_OK, ROW_ID FROM FDSOFT.AGENDA_MNG WHERE ROW_ID = ' + EID.Text;
+    Query.Open;
+    if Query.FieldByName('BIFAT_OK').AsString = 'NU' then begin
+      DBRezolvari.Visible := False;
+      Label7.Visible := False;
+      PBottom.Top := 319 + 25 + 3;
+      Btn_Salveaza.Top := 319;
+      Btn_Renunta.Top := 319;
+      SesizDetail.ClientHeight := 319 + 25 + 3 + 18;
+    end;
+  end;
+  if State = 'A' then begin
+    FirmePopulate;
+    Caption := 'Adaugare sesizare';
+    EID.Visible := False;
+    EClient.Left := 2;
+    EClient.Width := 569;
+    DApel.Date := Now;
+    DProgramat.Date := Now + 1;
+    CPentru.ItemIndex := CPentru.Items.Count - 1;
+    Label5.Visible := False;
+    SRez.Visible := False;
+    Btn_Salveaza.Caption := 'Adauga';
+    DBRezolvari.Visible := False;
+    Label7.Visible := False;
+    PBottom.Visible := False;
+    Btn_Salveaza.Top := 319;
+    Btn_Renunta.Top := 319;
+    SesizDetail.ClientHeight := 319 + 25 + 3;
+  end;
+
+end;
+
+function TSesizDetail.Start(ID, Stare: string): integer;
+begin
+  SesizDetail := TSesizDetail.Create(Application);
+  sID := ID;
+  State := Stare;
+  Clienti := TStringList.Create;
+end;
+
+end.

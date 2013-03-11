@@ -1,0 +1,333 @@
+object SendMail: TSendMail
+  Left = 0
+  Top = 0
+  Caption = 'SendMail'
+  ClientHeight = 562
+  ClientWidth = 862
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  ShowHint = True
+  OnKeyPress = FormKeyPress
+  OnShow = FormShow
+  DesignSize = (
+    862
+    562)
+  PixelsPerInch = 96
+  TextHeight = 13
+  object GAdrese: TGroupBox
+    Left = 0
+    Top = 0
+    Width = 333
+    Height = 562
+    Align = alLeft
+    Caption = 'Adrese'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 0
+    object LAdrese: TListBox
+      Left = 2
+      Top = 18
+      Width = 329
+      Height = 525
+      Align = alClient
+      ItemHeight = 16
+      TabOrder = 0
+      OnKeyUp = LAdreseKeyUp
+    end
+    object PBottom: TPanel
+      Left = 2
+      Top = 543
+      Width = 329
+      Height = 17
+      Align = alBottom
+      Caption = '[F4 - Adaugare] [Del - Stergere]'
+      Color = clSkyBlue
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentBackground = False
+      ParentFont = False
+      TabOrder = 1
+    end
+  end
+  object GCorp: TGroupBox
+    Left = 339
+    Top = 0
+    Width = 518
+    Height = 523
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    Caption = 'Mesaj:'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 1
+    DesignSize = (
+      518
+      523)
+    object Label1: TLabel
+      Left = 3
+      Top = 63
+      Width = 73
+      Height = 16
+      Caption = 'Atasamente:'
+    end
+    object Label2: TLabel
+      Left = 3
+      Top = 192
+      Width = 71
+      Height = 16
+      Caption = 'Corp mesaj:'
+    end
+    object Label3: TLabel
+      Left = 394
+      Top = 63
+      Width = 59
+      Height = 16
+      Caption = 'Presetate:'
+    end
+    object ESubiect: TLabeledEdit
+      Left = 3
+      Top = 37
+      Width = 511
+      Height = 24
+      Anchors = [akLeft, akTop, akRight]
+      EditLabel.Width = 47
+      EditLabel.Height = 16
+      EditLabel.Caption = 'Subiect:'
+      EditLabel.Font.Charset = DEFAULT_CHARSET
+      EditLabel.Font.Color = clWindowText
+      EditLabel.Font.Height = -13
+      EditLabel.Font.Name = 'Tahoma'
+      EditLabel.Font.Style = []
+      EditLabel.ParentFont = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 0
+    end
+    object LAtasamente: TListBox
+      Left = 2
+      Top = 81
+      Width = 393
+      Height = 110
+      Anchors = [akLeft, akTop, akRight]
+      ItemHeight = 16
+      ParentShowHint = False
+      PopupMenu = AttachMenu
+      ShowHint = True
+      TabOrder = 1
+      OnKeyUp = LAtasamenteKeyUp
+      OnMouseMove = LAtasamenteMouseMove
+    end
+    object Mesaj: TMemo
+      Left = 3
+      Top = 210
+      Width = 511
+      Height = 310
+      Anchors = [akLeft, akTop, akRight, akBottom]
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 2
+    end
+    object CBPreset: TCheckListBox
+      Left = 393
+      Top = 81
+      Width = 121
+      Height = 110
+      OnClickCheck = CBPresetClickCheck
+      ItemHeight = 16
+      Items.Strings = (
+        
+          'CONTABILITATE                                                   ' +
+          '         |1'
+        
+          'GESTIUNE                                                        ' +
+          '    |2'
+        
+          'SALARII                                                         ' +
+          '   |3'
+        
+          'MIJLOACE FIXE                                                   ' +
+          ' |4'
+        
+          'FARMACII                                                        ' +
+          '    |5'
+        
+          'REG. CASA                                                       ' +
+          '     |7')
+      TabOrder = 3
+    end
+  end
+  object Btn_Send: TButton
+    Left = 339
+    Top = 529
+    Width = 85
+    Height = 25
+    Anchors = [akLeft, akBottom]
+    Caption = 'Trimite'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 2
+    OnClick = Btn_SendClick
+  end
+  object Btn_Save: TButton
+    Left = 434
+    Top = 529
+    Width = 85
+    Height = 25
+    Anchors = [akLeft, akBottom]
+    Caption = 'Salveaza'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 3
+    OnClick = Btn_SaveClick
+  end
+  object Btn_Load: TButton
+    Left = 529
+    Top = 529
+    Width = 85
+    Height = 25
+    Anchors = [akLeft, akBottom]
+    Caption = 'Incarca'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 4
+    OnClick = Btn_LoadClick
+  end
+  object Btn_Renunta: TButton
+    Left = 624
+    Top = 529
+    Width = 85
+    Height = 25
+    Anchors = [akLeft, akBottom]
+    Caption = 'Renunta'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 5
+    OnClick = Btn_RenuntaClick
+  end
+  object CBDebug: TCheckBox
+    Left = 817
+    Top = 545
+    Width = 40
+    Height = 17
+    Caption = 'v2.0'
+    Checked = True
+    State = cbChecked
+    TabOrder = 6
+    Visible = False
+  end
+  object cbA: TCheckBox
+    Left = 805
+    Top = 526
+    Width = 49
+    Height = 17
+    Caption = 'Debug'
+    Enabled = False
+    TabOrder = 7
+  end
+  object SD: TSaveDialog
+    DefaultExt = 'mmb'
+    FileName = 'email.mmb'
+    Filter = 'Mail Message Body|*.mmb'
+    Options = [ofOverwritePrompt, ofEnableSizing]
+    Title = 'Salvare email...'
+    Left = 352
+    Top = 224
+  end
+  object OD: TOpenDialog
+    DefaultExt = 'mmb'
+    FileName = 'email.mmb'
+    Filter = 'Mail Message Body|*.mmb'
+    Options = [ofEnableSizing]
+    Title = 'Deschidere fisier...'
+    Left = 384
+    Top = 224
+  end
+  object AttachMenu: TPopupMenu
+    Left = 352
+    Top = 96
+    object Adaugare1: TMenuItem
+      Caption = 'Adaugare'
+      OnClick = Adaugare1Click
+    end
+    object Modificare1: TMenuItem
+      Caption = 'Modificare'
+      OnClick = Modificare1Click
+    end
+    object Stergere1: TMenuItem
+      Caption = 'Stergere'
+      OnClick = Stergere1Click
+    end
+  end
+  object SMTP: TIdSMTP
+    OnWorkEnd = SMTPWorkEnd
+    Host = 'dsoft.ro'
+    Password = 'ce1389e8'
+    Port = 587
+    SASLMechanisms = <>
+    Username = 'alex@dsoft.ro'
+    Left = 208
+    Top = 280
+  end
+  object Msg: TIdMessage
+    AttachmentEncoding = 'UUE'
+    BccList = <>
+    CCList = <>
+    Encoding = meDefault
+    FromList = <
+      item
+      end>
+    Recipients = <
+      item
+      end>
+    ReplyTo = <>
+    ConvertPreamble = True
+    Left = 248
+    Top = 280
+  end
+  object QMail: TQuery
+    DatabaseName = 'dsTest'
+    Left = 352
+    Top = 256
+  end
+end

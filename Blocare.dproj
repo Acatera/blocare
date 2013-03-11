@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{b9e75f22-c6c8-4a11-9a6b-7dda9c4e591d}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+    <DCC_DependencyCheckOutputName>Blocare.exe</DCC_DependencyCheckOutputName>
+    <MainSource>Blocare.dpr</MainSource>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Version>7.0</Version>
+    <DCC_DebugInformation>False</DCC_DebugInformation>
+    <DCC_LocalDebugSymbols>False</DCC_LocalDebugSymbols>
+    <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+    <DCC_Define>RELEASE</DCC_Define>
+    <DCC_Optimize>False</DCC_Optimize>
+    <DCC_GenerateStackFrames>True</DCC_GenerateStackFrames>
+    <DCC_ExeOutput>D:\Shared\Blocare</DCC_ExeOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Version>7.0</Version>
+    <DCC_Define>DEBUG</DCC_Define>
+    <DCC_Optimize>False</DCC_Optimize>
+    <DCC_GenerateStackFrames>True</DCC_GenerateStackFrames>
+  </PropertyGroup>
+  <ProjectExtensions>
+    <Borland.Personality>Delphi.Personality</Borland.Personality>
+    <Borland.ProjectType />
+    <BorlandProject>
+<BorlandProject><Delphi.Personality><Parameters><Parameters Name="UseLauncher">False</Parameters><Parameters Name="LoadAllSymbols">True</Parameters><Parameters Name="LoadUnspecifiedSymbols">False</Parameters><Parameters Name="RunParams">/restating</Parameters></Parameters><VersionInfo><VersionInfo Name="IncludeVerInfo">True</VersionInfo><VersionInfo Name="AutoIncBuild">True</VersionInfo><VersionInfo Name="MajorVer">0</VersionInfo><VersionInfo Name="MinorVer">1</VersionInfo><VersionInfo Name="Release">2</VersionInfo><VersionInfo Name="Build">9</VersionInfo><VersionInfo Name="Debug">True</VersionInfo><VersionInfo Name="PreRelease">False</VersionInfo><VersionInfo Name="Special">False</VersionInfo><VersionInfo Name="Private">False</VersionInfo><VersionInfo Name="DLL">False</VersionInfo><VersionInfo Name="Locale">1033</VersionInfo><VersionInfo Name="CodePage">1252</VersionInfo></VersionInfo><VersionInfoKeys><VersionInfoKeys Name="CompanyName">Danciu Alexandru Vasile</VersionInfoKeys><VersionInfoKeys Name="FileDescription">dsBlocare</VersionInfoKeys><VersionInfoKeys Name="FileVersion">0.1.2.9</VersionInfoKeys><VersionInfoKeys Name="InternalName">blocare.exe</VersionInfoKeys><VersionInfoKeys Name="LegalCopyright">Copyright (c) 2011 Danciu Alexandru Vasile</VersionInfoKeys><VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys><VersionInfoKeys Name="OriginalFilename">Blocare.exe</VersionInfoKeys><VersionInfoKeys Name="ProductName">dsBlocare</VersionInfoKeys><VersionInfoKeys Name="ProductVersion">0.1.0.0</VersionInfoKeys><VersionInfoKeys Name="Comments"></VersionInfoKeys></VersionInfoKeys><Source><Source Name="MainSource">Blocare.dpr</Source></Source><Excluded_Packages></Excluded_Packages></Delphi.Personality><ModelSupport>True</ModelSupport></BorlandProject></BorlandProject>
+  </ProjectExtensions>
+  <Import Project="$(MSBuildBinPath)\Borland.Delphi.Targets" />
+  <ItemGroup>
+    <DelphiCompile Include="Blocare.dpr">
+      <MainSource>MainSource</MainSource>
+    </DelphiCompile>
+    <DCCReference Include="Add_Modify.pas">
+      <Form>AddModify</Form>
+    </DCCReference>
+    <DCCReference Include="AlexUtils.pas" />
+    <DCCReference Include="Bank.pas">
+      <Form>FBank</Form>
+    </DCCReference>
+    <DCCReference Include="Color.pas">
+      <Form>Culori</Form>
+    </DCCReference>
+    <DCCReference Include="DContact.pas">
+      <Form>Contact</Form>
+    </DCCReference>
+    <DCCReference Include="Dialog.pas">
+      <Form>FDialog</Form>
+    </DCCReference>
+    <DCCReference Include="Editare.pas">
+      <Form>FEditare</Form>
+    </DCCReference>
+    <DCCReference Include="Extras_Cont.pas">
+      <Form>ExtrasCont</Form>
+    </DCCReference>
+    <DCCReference Include="E_Mail.pas">
+      <Form>EMail</Form>
+    </DCCReference>
+    <DCCReference Include="Fisa_Client.pas">
+      <Form>FisaClient</Form>
+    </DCCReference>
+    <DCCReference Include="FMain.pas">
+      <Form>MainForm</Form>
+    </DCCReference>
+    <DCCReference Include="FOptiuni.pas">
+      <Form>Optiuni</Form>
+    </DCCReference>
+    <DCCReference Include="FRezolvare.pas">
+      <Form>Rezolvare</Form>
+    </DCCReference>
+    <DCCReference Include="FSesizari.pas">
+      <Form>Sesizari</Form>
+    </DCCReference>
+    <DCCReference Include="FStatii.pas">
+      <Form>Statii</Form>
+    </DCCReference>
+    <DCCReference Include="Fur_Detail.pas">
+      <Form>FurDetail</Form>
+    </DCCReference>
+    <DCCReference Include="Fur_Panel.pas">
+      <Form>FurPanel</Form>
+    </DCCReference>
+    <DCCReference Include="FWait.pas">
+      <Form>Wait</Form>
+    </DCCReference>
+    <DCCReference Include="Jur_Clienti.pas">
+      <Form>JurClienti</Form>
+    </DCCReference>
+    <DCCReference Include="Jur_C_Clienti.pas">
+      <Form>JurCClienti</Form>
+    </DCCReference>
+    <DCCReference Include="ListareFacturi.pas" />
+    <DCCReference Include="Required\Thread_Send.pas" />
+    <DCCReference Include="Sel_Mail.pas">
+      <Form>SelMail</Form>
+    </DCCReference>
+    <DCCReference Include="Send_Mail.pas">
+      <Form>SendMail</Form>
+    </DCCReference>
+    <DCCReference Include="Sent_Mail.pas">
+      <Form>SentMail</Form>
+    </DCCReference>
+    <DCCReference Include="Sesiz_Detail.pas">
+      <Form>SesizDetail</Form>
+    </DCCReference>
+    <DCCReference Include="Temp_Rap.pas">
+      <Form>TempRap</Form>
+    </DCCReference>
+    <DCCReference Include="Updater.pas" />
+    <None Include="ModelSupport_Blocare\Blocare\default.txaPackage" />
+    <None Include="ModelSupport_Blocare\Blocare\default.txvpck" />
+    <None Include="ModelSupport_Blocare\default.txaPackage" />
+    <None Include="ModelSupport_Blocare\FMain\default.txaPackage" />
+    <None Include="ModelSupport_Blocare\FMain\default.txvpck" />
+    <None Include="ModelSupport_Blocare\Fur_Detail\default.txaPackage" />
+    <None Include="ModelSupport_Blocare\ListareFacturi\default.txaPackage" />
+    <None Include="ModelSupport_Blocare\ListareFacturi\default.txvpck" />
+    <None Include="ModelSupport_Blocare\Sel_Mail\default.txaPackage" />
+    <None Include="ModelSupport_Blocare\Send_Mail\default.txaPackage" />
+    <None Include="ModelSupport_Blocare\Thread_Send\default.txaPackage" />
+    <None Include="ModelSupport_Blocare\Unit1\default.txaPackage" />
+    <None Include="ModelSupport_Blocare\Unit1\default.txvpck" />
+    <None Include="ModelSupport_Blocare\Updater\default.txaPackage" />
+  </ItemGroup>
+</Project>
